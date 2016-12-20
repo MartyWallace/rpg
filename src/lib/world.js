@@ -188,13 +188,13 @@ class World extends EventEmitter {
 	view(cell) {
 		this.viewing = cell;
 
-		this.graphics.x = -cell.x * this.scale + (renderer.width / 2) - (this.scale / 2);
-		this.graphics.y = -cell.y * this.scale + (renderer.height / 2) - (this.scale / 2);
+		this.graphics.x = -cell.x * this.scale + (GAME_WIDTH / 2) - (this.scale / 2);
+		this.graphics.y = -cell.y * this.scale + (GAME_HEIGHT / 2) - (this.scale / 2);
 
 		if (this.graphics.x > 0) this.graphics.x = 0;
 		if (this.graphics.y > 0) this.graphics.y = 0;
-		if (this.graphics.x + this.graphics.width < renderer.width) this.graphics.x = renderer.width - this.graphics.width;
-		if (this.graphics.y + this.graphics.height < renderer.height) this.graphics.y = renderer.height - this.graphics.height;
+		if (this.graphics.x + this.graphics.width < GAME_WIDTH) this.graphics.x = GAME_WIDTH - this.graphics.width;
+		if (this.graphics.y + this.graphics.height < GAME_HEIGHT) this.graphics.y = GAME_HEIGHT - this.graphics.height;
 	}
 
 	findByType(type) {

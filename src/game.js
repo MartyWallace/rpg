@@ -1,36 +1,39 @@
-const DRAW_SCALE = 60;
+const game = new Vue({
+	el: 'main',
 
-const view = document.querySelector('canvas');
-const renderer = PIXI.autoDetectRenderer(DRAW_SCALE * 16, DRAW_SCALE * 12, { view, backgroundColor: 0xEEEEEE });
-const stage = new PIXI.Container();
+	data: {
+		renderer: null,
+		stage: new PIXI.Container(),
+		world: new World(20, 24, DRAW_SCALE)
+	},
 
-const game = {
-	world: null,
-	hud: null,
+	methods: {
+		update() {
+			this.world.update();
 
-	init() {
-		this.world = new World(20, 24, DRAW_SCALE);
-		this.hud = new HUD(this.world);
+			this.renderer.render(this.stage);
 
-		stage.addChild(this.world.graphics);
-		stage.addChild(this.hud.graphics);
+			window.requestAnimationFrame(this.update.bind(this));
+		}
+	},
+
+	computed: {
+		heroes() {
+			return this.world.party ? this.world.party.heroes : [];
+		}
+	},
+
+	mounted() {
+		let canvas = this.$el.querySelector('canvas');
+
+		this.renderer = PIXI.autoDetectRenderer(DRAW_SCALE * 12, DRAW_SCALE * 10, {
+			view: canvas,
+			backgroundColor: 0xAAAAAA
+		});
+
+		this.stage.addChild(this.world.graphics);
 		
-		this.world.load({
-			width: 30,
-			height: 20,
-			beings: [
-				{ type: 'Wall', x: 5, y: 5 },
-				{ type: 'Wall', x: 5, y: 6 },
-				{ type: 'Wall', x: 5, y: 7 },
-				{ type: 'Wall', x: 6, y: 7 },
-				{ type: 'Wall', x: 22, y: 7 },
-				{ type: 'Wall', x: 23, y: 7 },
-				{ type: 'Wall', x: 24, y: 7 },
-				{ type: 'Wall', x: 25, y: 7 },
-				{ type: 'Skeleton', x: 10, y: 7 },
-				{ type: 'Skeleton', x: 10, y: 18 }
-			]
-		}, {
+		this.world.load(LEVELS[0], {
 			x: 1,
 			y: 3,
 			heroes: [
@@ -40,8 +43,8 @@ const game = {
 			]
 		});
 
-		view.addEventListener('click', event => {
-			let bounds = view.getBoundingClientRect();
+		canvas.addEventListener('click', event => {
+			let bounds = canvas.getBoundingClientRect();
 			this.world.handleClick(event.pageX - bounds.left, event.pageY - bounds.top);
 		});
 
@@ -50,13 +53,5 @@ const game = {
 		});
 
 		this.update();
-	},
-
-	update() {
-		this.world.update();
-
-		renderer.render(stage);
-
-		window.requestAnimationFrame(this.update.bind(this));
 	}
-};
+});

@@ -3,15 +3,28 @@
 	<head>
 		<meta charset="utf-8">
 		<title>rpg</title>
+
+		<link rel="stylesheet" href="./dist/main.css">
 	</head>
 	<body>
-		<canvas></canvas>
+		<main>
+			<canvas></canvas>
+
+			<aside>
+				<section class="party">
+					<ul>
+						<li v-for="hero in heroes">
+							{{ hero.cell.x, hero.cell.y }}
+						</li>
+					</ul>
+				</section>
+			</aside>
+		</main>
 
 		<script src="./bower_components/pixi.js/dist/pixi.min.js"></script>
 		<script src="./bower_components/eventEmitter/EventEmitter.min.js"></script>
 		<script src="./bower_components/pathfinding/pathfinding-browser.min.js"></script>
+		<script src="./bower_components/vue/dist/vue.js"></script>
 		<script src="./dist/main.js"></script>
-
-		<script>game.init();</script>
 	</body>
 </html>

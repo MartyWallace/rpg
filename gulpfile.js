@@ -1,14 +1,24 @@
 const gulp = require('gulp');
 const babel = require('gulp-babel');
 const concat = require('gulp-concat');
+const sass = require('gulp-sass');
 
 gulp.task('js', () => {
-	let pipe = gulp.src('./src/**/*.js')
+	gulp.src(['./src/global.js', './src/lib/**/*.js', './src/game.js'])
+		.pipe(concat('main.js'))
 		.pipe(babel({ presets: ['es2015'] }))
-		.pipe(concat('main.js'));
-	
-	pipe.pipe(gulp.dest('./dist'));
+		.pipe(gulp.dest('./dist'));
 });
 
-gulp.task('watch', () => gulp.watch('./src/**/*.js', ['js']));
-gulp.task('default', ['js', 'watch']);
+gulp.task('css', () => {
+	gulp.src('./scss/main.scss')
+		.pipe(sass())
+		.pipe(gulp.dest('./dist'));
+});
+
+gulp.task('watch', () => {
+	gulp.watch('./src/**/*.js', ['js']);
+	gulp.watch('./scss/**/*.scss', ['css']);
+});
+
+gulp.task('default', ['js', 'css', 'watch']);
