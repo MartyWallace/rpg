@@ -1,12 +1,14 @@
+const DRAW_SCALE = 60;
+
 const view = document.querySelector('canvas');
-const renderer = PIXI.autoDetectRenderer(840, 560, { view, backgroundColor: 0xEEEEEE });
+const renderer = PIXI.autoDetectRenderer(DRAW_SCALE * 16, DRAW_SCALE * 12, { view, backgroundColor: 0xEEEEEE });
 const stage = new PIXI.Container();
 
 const game = {
 	world: null,
 
 	init() {
-		this.world = new World(40, 40);
+		this.world = new World(20, 24, DRAW_SCALE);
 		stage.addChild(this.world.graphics);
 		
 		this.world.load({
@@ -22,6 +24,8 @@ const game = {
 			let bounds = view.getBoundingClientRect();
 			this.world.handleClick(event.pageX - bounds.left, event.pageY - bounds.top);
 		});
+
+		console.log(this.world.grid.path(this.world.grid.find(0, 0), this.world.grid.find(5, 5)));
 
 		this.update();
 	},
