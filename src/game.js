@@ -24,6 +24,9 @@ const game = {
 				{ type: 'Wall', x: 5, y: 7 },
 				{ type: 'Wall', x: 6, y: 7 },
 				{ type: 'Wall', x: 22, y: 7 },
+				{ type: 'Wall', x: 23, y: 7 },
+				{ type: 'Wall', x: 24, y: 7 },
+				{ type: 'Wall', x: 25, y: 7 },
 				{ type: 'Skeleton', x: 10, y: 7 },
 				{ type: 'Skeleton', x: 10, y: 18 }
 			]
@@ -31,15 +34,19 @@ const game = {
 			x: 1,
 			y: 3,
 			heroes: [
-				{ name: 'marty', type: 'warrior' },
-				{ name: 'carlie', type: 'archer' },
-				{ name: 'mia', type: 'baby' }
+				{ name: 'marty', type: 'warrior', attrs: { color: 0xFFFFFF } },
+				{ name: 'carlie', type: 'archer', attrs: { color: 0xFFFFFF } },
+				{ name: 'mia', type: 'baby', attrs: { color: 0xFFFFFF } }
 			]
 		});
 
 		view.addEventListener('click', event => {
 			let bounds = view.getBoundingClientRect();
 			this.world.handleClick(event.pageX - bounds.left, event.pageY - bounds.top);
+		});
+
+		this.world.on('interact', cell => {
+			console.log(cell);
 		});
 
 		this.update();

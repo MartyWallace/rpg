@@ -1,200 +1,3 @@
-class Being {
-	constructor(world, cell) {
-		this.world = world;
-		this.cell = cell;
-		this.prevCell = null;
-		this.graphics = null;
-		this.walkable = true;
-	}
-
-	setCell(cell) {
-		if (this.graphics) {
-			this.graphics.x = cell.x * this.world.scale;
-			this.graphics.y = cell.y * this.world.scale;
-		}
-
-		this.prevCell = this.cell;
-		this.cell = cell;
-	}
-
-	update() {
-		//
-	}
-}
-
-class Wall extends Being {
-	constructor(world, cell) {
-		super(world, cell);
-
-		this.walkable = false;
-
-		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(0x111111);
-		this.graphics.drawRect(0, 0, world.scale, world.scale);
-		
-		this.setCell(cell);
-	}
-}
-
-class Creature extends Being {
-	constructor(world, cell) {
-		super(world, cell);
-
-		this.stats = {
-			health: 1,
-			maxhealth: 1
-		};
-	}
-}
-
-class Hero extends Creature {
-	constructor(world, cell) {
-		super(world, cell);
-
-		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(Math.random() * 0x444444);
-		this.graphics.drawRect(0, 0, world.scale, world.scale);
-		this.graphics.endFill();
-
-		this.setCell(cell);
-	}
-}
-
-class Enemy extends Creature {
-	constructor(world, cell) {
-		super(world, cell);
-
-		this.cooldown = 4;
-		this.maxCooldown = 4;
-
-		this.movement = 2;
-
-		world.on('playerMoved', () => {
-			this.cooldown -= 1;
-
-			if (this.cooldown <= 0) {
-				this.action();
-				this.cooldown = this.maxCooldown;
-				this.world.emit('startActing', this);
-			}
-		});
-	}
-
-	action() {
-		this.world.emit('endActing', this);
-		console.log('Some action.');
-	}
-}
-
-class Skeleton extends Enemy {
-	constructor(world, cell) {
-		super(world, cell);
-
-		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(0x00CC22);
-		this.graphics.drawRect(0, 0, world.scale, world.scale);
-		this.graphics.endFill();
-
-		this.setCell(cell);
-	}
-
-	action() {
-		let path = this.world.grid.path(this.cell, this.world.party.leader.cell, true);
-		path.cells = path.cells.slice(0, this.movement);
-
-		path.follow(cell => {
-			this.setCell(cell);
-		}, 80).then(() => this.world.emit('endActing', this));
-	}
-}
-
-const beings = {
-	Wall, Hero, Skeleton
-};
-
-class Path {
-	constructor(cells) {
-		this.cells = cells;
-	}
-
-	follow(callback, delay) {
-		return new Promise((resolve, reject) => {
-			let interval = setInterval(() => {
-				if (this.cells.length > 0) {
-					callback(this.cells.shift());
-				} else {
-					clearInterval(interval);
-					resolve();
-				}
-			}, delay);
-		});
-	}
-}
-
-class Grid {
-	constructor(world, width, height) {
-		this.world = world;
-		this.width = width;
-		this.height = height;
-		this.finder = new PF.AStarFinder();
-		this.cells = [];
-
-		for (let y = 0; y < height; y++) {
-			this.cells[y] = [];
-
-			for (let x = 0; x < width; x++) {
-				this.cells[y][x] = new Cell(this, x, y);
-			}
-		}
-	}
-
-	find(x, y, scale = 1) {
-		x = Math.floor(x / scale);
-		y = Math.floor(y / scale);
-
-		if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
-			console.warn('Trying to get an out of bounds cell (' + x + ', ' + y + ').');
-			return null;
-		}
-
-		return this.cells[y][x];
-	}
-
-	path(start, end, trimFirst = false) {
-		let nodes = new PF.Grid(this.width, this.height);
-
-		this.world.beings.items.forEach(being => {
-			if (!being.walkable) {
-				nodes.setWalkableAt(being.cell.x, being.cell.y, false);
-			}
-		});
-
-		let path = new Path(this.finder.findPath(start.x, start.y, end.x, end.y, nodes).map(coords => this.find(coords[0], coords[1])));
-
-		if (trimFirst) path.cells = path.cells.splice(1);
-
-		return path;
-	}
-}
-
-class Cell {
-	constructor(grid, x, y) {
-		this.grid = grid;
-		this.x = x;
-		this.y = y;
-	}
-
-	get content() {
-		let result = null;
-
-		this.grid.world.beings.items.forEach(being => {
-			if (being.cell === this) result = being;
-		});
-
-		return result;
-	}
-}
-
 class Party {
 	constructor(heroes) {
 		this.heroes = heroes;
@@ -276,31 +79,61 @@ class World extends EventEmitter {
 			let cell = this.grid.find(x - this.graphics.x, y - this.graphics.y, this.scale);
 
 			if (cell) {
-				this.setState(this.STATE_WALKING);
+				if (cell.empty) {
+					this.setState(this.STATE_WALKING);
 
-				let path = this.grid.path(this.party.leader.cell, cell, true);
+					let path = this.grid.path(this.party.leader.cell, cell, true);
 
-				path.follow(cell => {
-					this.party.moveTo(cell);
-					this.view(cell);
-					this.emit('playerMoved', cell);
-				}, 80).then(() => this.setState(this.STATE_IDLE));
+					path.follow(cell => {
+						this.party.moveTo(cell);
+						this.view(cell);
+						this.emit('playerMoved', cell);
+					}, 80).then(() => this.setState(this.STATE_IDLE));
+				} else {
+					// Interact with cell.
+					this.emit('interact', cell);
+					console.log('TODO: Interaction for cell.');
+				}
 			}
 		} else {
 			// Walking, probably.
 		}
 	}
 
-	create(type, cell) {
-		let being = new type(this, cell);
+	/**
+	 * Creates a new Being in this world using a provided definition.
+	 * 
+	 * @param {Object} def The definition for the Being to create. At minimum this must provide the
+	 * fields "type", "x" and "y".
+	 * 
+	 * @return {Being}
+	 * 
+	 * @throws {Error} If any required fields are missing.
+	 * @throws {Error} If the type does not exist.
+	 * @throws {Error} If the x and y values provided are out of bounds for the current level.
+	 */
+	create(def) {
+		if (!('type' in def)) throw new Error('Definition is missing "type".');
+		if (!('x' in def)) throw new Error('Definition is missing "x".');
+		if (!('y' in def)) throw new Error('Definition is missing "y".');
 
-		if (being.graphics) {
-			this.graphics.addChild(being.graphics);
+		if (!(def.type in beings)) throw new Error(`Unknown Being type "${def.type}".`);
+
+		let cell = this.grid.find(def.x, def.y);
+
+		if (cell) {
+			let being = new beings[def.type](this, cell, def);
+
+			if (being.graphics) {
+				this.graphics.addChild(being.graphics);
+			}
+
+			this.beings.add(being);
+
+			return being;
+		} else {
+			throw new Error(`Cannot create Being out of bounds (${def.type} at ${def.x}, ${def.y}).`);
 		}
-
-		this.beings.add(being);
-
-		return being;
 	}
 
 	destroy(being) {
@@ -320,22 +153,17 @@ class World extends EventEmitter {
 
 		this.setupGrid(level.width, level.height, this.scale);
 
-		level.beings.forEach(def => {
-			let pos = this.grid.find(def.x, def.y);
-
-			if (pos) this.create(beings[def.type], pos);
-			else console.warn('Cannot load beings out of bounds, ignoring (' + def.type + ' at ' + def.x + ', ' + def.y + ').');
-		});
+		level.beings.forEach(def => this.create(def));
 
 		let heroes = [];
 
-		party.heroes.forEach(def => {
-			heroes.push(this.create(Hero, this.grid.find(party.x, party.y)));
+		party.heroes.forEach(data => {
+			heroes.push(this.create({ type: 'Hero', x: party.x, y: party.y, data }));
 		});
 
 		this.party = new Party(heroes);
 
-		this.view(this.hero.cell);
+		this.view(this.party.leader.cell);
 
 		this.emit('load');
 	}
@@ -369,6 +197,4 @@ class World extends EventEmitter {
 		this.state = state;
 		this.emit('state', state);
 	}
-
-	get hero() { return this.findByType(Hero)[0]; }
 }
