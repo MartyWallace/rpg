@@ -6,20 +6,24 @@ const stage = new PIXI.Container();
 
 const game = {
 	world: null,
+	hud: null,
 
 	init() {
 		this.world = new World(20, 24, DRAW_SCALE);
+		this.hud = new HUD(this.world);
+
 		stage.addChild(this.world.graphics);
+		stage.addChild(this.hud.graphics);
 		
 		this.world.load({
-			width: 20,
+			width: 30,
 			height: 20,
 			beings: [
 				{ type: 'Wall', x: 5, y: 5 },
 				{ type: 'Wall', x: 5, y: 6 },
 				{ type: 'Wall', x: 5, y: 7 },
 				{ type: 'Wall', x: 6, y: 7 },
-				{ type: 'Wall', x: 7, y: 7 }
+				{ type: 'Wall', x: 22, y: 12 }
 			]
 		}, {
 			x: 1,
@@ -27,7 +31,8 @@ const game = {
 			heroes: [
 				{ name: 'marty', type: 'warrior' },
 				{ name: 'carlie', type: 'archer' },
-				{ name: 'mia', type: 'baby' }
+				{ name: 'mia', type: 'baby' },
+				{ name: 'bradley', type: 'egg' }
 			]
 		});
 

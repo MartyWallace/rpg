@@ -68,7 +68,7 @@ class Grid {
 		for (let y = 0; y < height; y++) {
 			this.cells[y] = [];
 
-			for (let x = 0; x < height; x++) {
+			for (let x = 0; x < width; x++) {
 				this.cells[y][x] = new Cell(this, x, y);
 			}
 		}
@@ -104,6 +104,16 @@ class Cell {
 		this.grid = grid;
 		this.x = x;
 		this.y = y;
+	}
+
+	get content() {
+		let result = null;
+
+		this.grid.world.beings.items.forEach(being => {
+			if (being.cell === this) result = being;
+		});
+
+		return result;
 	}
 }
 
@@ -229,7 +239,10 @@ class World extends EventEmitter {
 		this.setupGrid(level.width, level.height, this.scale);
 
 		level.beings.forEach(def => {
-			this.create(beings[def.type], this.grid.find(def.x, def.y));
+			let pos = this.grid.find(def.x, def.y);
+
+			if (pos) this.create(beings[def.type], pos);
+			else console.warn('Cannot load beings out of bounds, ignoring (' + def.type + ' at ' + def.x + ', ' + def.y + ').');
 		});
 
 		let heroes = [];
@@ -239,7 +252,6 @@ class World extends EventEmitter {
 		});
 
 		this.party = new Party(heroes);
-		console.log(this.party);
 
 		this.view(this.hero.cell);
 	}
@@ -257,6 +269,11 @@ class World extends EventEmitter {
 
 		this.graphics.x = -cell.x * this.scale + (renderer.width / 2) - (this.scale / 2);
 		this.graphics.y = -cell.y * this.scale + (renderer.height / 2) - (this.scale / 2);
+
+		if (this.graphics.x > 0) this.graphics.x = 0;
+		if (this.graphics.y > 0) this.graphics.y = 0;
+		if (this.graphics.x + this.graphics.width < renderer.width) this.graphics.x = renderer.width - this.graphics.width;
+		if (this.graphics.y + this.graphics.height < renderer.height) this.graphics.y = renderer.height - this.graphics.height;
 	}
 
 	findByType(type) {
