@@ -160,7 +160,7 @@ class World extends EventEmitter {
 					} else {
 						this.state = this.STATE_IDLE;
 					}
-				}, 200);
+				}, 100);
 			}
 		} else {
 			// Walking, probably.
@@ -195,6 +195,8 @@ class World extends EventEmitter {
 		level.beings.forEach(def => {
 			this.create(beings[def.type], this.grid.find(def.x, def.y));
 		});
+
+		this.view(this.hero.cell);
 	}
 
 	unload() {
