@@ -1,8 +1,14 @@
 $game-width: 720px;
 $game-height: 600px;
-$aside-width: 260px;
+$aside-width: 300px;
 
 @import "reset";
+
+.clear:after {
+	display: block;
+	content: '';
+	clear: both;
+}
 
 body {
 	background: #EEE;
@@ -26,5 +32,31 @@ main {
 		height: $game-height;
 		background: #333;
 		color: #EEE;
+		padding: 20px;
+	}
+}
+
+.party {
+	@extend .clear;
+
+	li {
+		display: inline;
+	}
+
+	.hero {
+		float: left;
+		width: 80px;
+		height: 90px;
+		background: #222;
+
+		.profile {
+			text-align: center;
+			line-height: 80px;
+			background: #444;
+		}
+	}
+
+	li + li .hero {
+		margin-left: 10px;
 	}
 }

@@ -14,7 +14,16 @@
 				<section class="party">
 					<ul>
 						<li v-for="hero in heroes">
-							{{ hero.cell.x, hero.cell.y }}
+							<div class="hero">
+								<div class="profile">
+									{{ hero.def.data.name }}
+								</div>
+								<div class="status">
+									<div class="hp">
+										<div :style="'width:' + (hero.stats.health / hero.stats.maxHealth) + '%'"></div>
+									</div>
+								</div>
+							</div>
 						</li>
 					</ul>
 				</section>
