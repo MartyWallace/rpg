@@ -12,13 +12,22 @@ const game = {
 		stage.addChild(this.world.graphics);
 		
 		this.world.load({
+			width: 20,
+			height: 20,
 			beings: [
 				{ type: 'Wall', x: 5, y: 5 },
 				{ type: 'Wall', x: 5, y: 6 },
 				{ type: 'Wall', x: 5, y: 7 },
 				{ type: 'Wall', x: 6, y: 7 },
-				{ type: 'Wall', x: 7, y: 7 },
-				{ type: 'Hero', x: 4, y: 8 }
+				{ type: 'Wall', x: 7, y: 7 }
+			]
+		}, {
+			x: 1,
+			y: 3,
+			heroes: [
+				{ name: 'marty', type: 'warrior' },
+				{ name: 'carlie', type: 'archer' },
+				{ name: 'mia', type: 'baby' }
 			]
 		});
 
@@ -26,8 +35,6 @@ const game = {
 			let bounds = view.getBoundingClientRect();
 			this.world.handleClick(event.pageX - bounds.left, event.pageY - bounds.top);
 		});
-
-		console.log(this.world.grid.path(this.world.grid.find(0, 0), this.world.grid.find(5, 5)));
 
 		this.update();
 	},

@@ -2,6 +2,7 @@ class Being {
 	constructor(world, cell) {
 		this.world = world;
 		this.cell = cell;
+		this.prevCell = null;
 		this.graphics = null;
 		this.walkable = true;
 	}
@@ -12,6 +13,7 @@ class Being {
 			this.graphics.y = cell.y * this.world.scale;
 		}
 
+		this.prevCell = this.cell;
 		this.cell = cell;
 	}
 
@@ -43,7 +45,7 @@ class Hero extends Mobile {
 		super(world, cell);
 
 		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(0xFF0000);
+		this.graphics.beginFill(Math.random() * 0x444444);
 		this.graphics.drawRect(0, 0, world.scale, world.scale);
 		this.graphics.endFill();
 
@@ -105,6 +107,36 @@ class Cell {
 	}
 }
 
+class Party {
+	constructor(heroes) {
+		this.heroes = heroes;
+	}
+
+	moveTo(cell) {
+		let last = null;
+
+		this.heroes.forEach(hero => {
+			if (last === null) {
+				hero.setCell(cell);
+			} else {
+				if (last.prevCell) {
+					hero.setCell(last.prevCell);
+				}
+			}
+
+			last = hero;
+		});
+	}
+
+	get leader() {
+		return this.heroes.length > 0 ? this.heroes[0] : null;
+	}
+
+	get followers() {
+		return this.heroes.filter(hero => hero !== this.leader);
+	}
+}
+
 class World extends EventEmitter {
 	constructor(width, height, scale = 40) {
 		super();
@@ -117,8 +149,7 @@ class World extends EventEmitter {
 		this.graphics = new PIXI.Container();
 		this.viewing = null;
 		this.state = this.STATE_IDLE;
-
-		this.setupGrid(width, height, scale);
+		this.party = null;
 	}
 
 	setupGrid(width, height, scale) {
@@ -150,17 +181,18 @@ class World extends EventEmitter {
 			if (cell) {
 				this.state = this.STATE_WALKING;
 
-				let path = this.grid.path(this.hero.cell, cell);
+				let path = this.grid.path(this.party.leader.cell, cell).filter(cell => cell !== this.party.leader.cell);
 
-				setInterval(() => {
+				let interval = setInterval(() => {
 					if (path.length > 0) {
 						let cell = path.shift();
-						this.hero.setCell(cell);
+						this.party.moveTo(cell);
 						this.view(cell);
 					} else {
+						clearInterval(interval);
 						this.state = this.STATE_IDLE;
 					}
-				}, 100);
+				}, 80);
 			}
 		} else {
 			// Walking, probably.
@@ -187,20 +219,33 @@ class World extends EventEmitter {
 		this.beings.remove(being);
 	}
 
-	load(level) {
+	load(level, party) {
+		this.unload();
+
 		if (typeof level === 'string') {
 			level = JSON.parse(level);
 		}
+
+		this.setupGrid(level.width, level.height, this.scale);
 
 		level.beings.forEach(def => {
 			this.create(beings[def.type], this.grid.find(def.x, def.y));
 		});
 
+		let heroes = [];
+
+		party.heroes.forEach(def => {
+			heroes.push(this.create(Hero, this.grid.find(party.x, party.y)));
+		});
+
+		this.party = new Party(heroes);
+		console.log(this.party);
+
 		this.view(this.hero.cell);
 	}
 
 	unload() {
-		this.beings.forEach(being => this.destroy(being));
+		this.beings.items.forEach(being => this.destroy(being));
 	}
 
 	update() {
