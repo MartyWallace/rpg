@@ -21,6 +21,14 @@ class Being {
 	update() {
 		//
 	}
+
+	save() {
+		return {
+			type: this.def.type,
+			x: this.cell.x,
+			y: this.cell.y
+		};
+	}
 }
 
 class Wall extends Being {
@@ -58,6 +66,10 @@ class Hero extends Creature {
 		this.graphics.endFill();
 
 		this.setCell(cell);
+	}
+
+	save() {
+		return null;
 	}
 }
 

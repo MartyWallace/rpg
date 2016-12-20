@@ -173,6 +173,14 @@ class World extends EventEmitter {
 		this.emit('unload');
 	}
 
+	save() {
+		return {
+			width: this.grid.width,
+			height: this.grid.height,
+			beings: this.beings.items.map(being => being.save()).filter(def => def !== null)
+		};
+	}
+
 	update() {
 		this.beings.items.forEach(being => being.update());
 	}
