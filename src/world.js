@@ -29,18 +29,25 @@ class Wall extends Being {
 		this.walkable = false;
 
 		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(0x333333);
+		this.graphics.beginFill(0x111111);
 		this.graphics.drawRect(0, 0, world.scale, world.scale);
 		
 		this.setCell(cell);
 	}
 }
 
-class Mobile extends Being {
-	//
+class Creature extends Being {
+	constructor(world, cell) {
+		super(world, cell);
+
+		this.stats = {
+			health: 1,
+			maxhealth: 1
+		};
+	}
 }
 
-class Hero extends Mobile {
+class Hero extends Creature {
 	constructor(world, cell) {
 		super(world, cell);
 
@@ -53,8 +60,21 @@ class Hero extends Mobile {
 	}
 }
 
+class Skeleton extends Creature {
+	constructor(world, cell) {
+		super(world, cell);
+
+		this.graphics = new PIXI.Graphics();
+		this.graphics.beginFill(0x00CC22);
+		this.graphics.drawRect(0, 0, world.scale, world.scale);
+		this.graphics.endFill();
+
+		this.setCell(cell);
+	}
+}
+
 const beings = {
-	Wall, Hero
+	Wall, Hero, Skeleton
 };
 
 class Grid {
@@ -170,7 +190,7 @@ class World extends EventEmitter {
 		for (let x = 0; x < width; x++ ) {
 			for (let y = 0; y < height; y++) {
 				let box = new PIXI.Graphics();
-				box.beginFill(light ? 0xDDDDDD : 0xCCCCCC);
+				box.beginFill(light ? 0x666666 : 0x606060);
 				box.drawRect(0, 0, scale, scale);
 				box.position.set(x * scale, y * scale);
 				box.endFill();
@@ -254,10 +274,13 @@ class World extends EventEmitter {
 		this.party = new Party(heroes);
 
 		this.view(this.hero.cell);
+
+		this.emit('load');
 	}
 
 	unload() {
 		this.beings.items.forEach(being => this.destroy(being));
+		this.emit('unload');
 	}
 
 	update() {

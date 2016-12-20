@@ -23,7 +23,8 @@ const game = {
 				{ type: 'Wall', x: 5, y: 6 },
 				{ type: 'Wall', x: 5, y: 7 },
 				{ type: 'Wall', x: 6, y: 7 },
-				{ type: 'Wall', x: 22, y: 12 }
+				{ type: 'Wall', x: 22, y: 7 },
+				{ type: 'Skeleton', x: 10, y: 7 }
 			]
 		}, {
 			x: 1,
@@ -31,8 +32,7 @@ const game = {
 			heroes: [
 				{ name: 'marty', type: 'warrior' },
 				{ name: 'carlie', type: 'archer' },
-				{ name: 'mia', type: 'baby' },
-				{ name: 'bradley', type: 'egg' }
+				{ name: 'mia', type: 'baby' }
 			]
 		});
 
