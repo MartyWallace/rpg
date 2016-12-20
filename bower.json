@@ -1,0 +1,7 @@
+{
+  "name": "rpg",
+  "version": "0.0.1",
+  "dependencies": {
+    "pixi.js": "^4.3.0"
+  }
+}
