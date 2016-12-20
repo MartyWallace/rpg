@@ -24,7 +24,8 @@ const game = {
 				{ type: 'Wall', x: 5, y: 7 },
 				{ type: 'Wall', x: 6, y: 7 },
 				{ type: 'Wall', x: 22, y: 7 },
-				{ type: 'Skeleton', x: 10, y: 7 }
+				{ type: 'Skeleton', x: 10, y: 7 },
+				{ type: 'Skeleton', x: 10, y: 18 }
 			]
 		}, {
 			x: 1,

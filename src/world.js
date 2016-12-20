@@ -60,7 +60,33 @@ class Hero extends Creature {
 	}
 }
 
-class Skeleton extends Creature {
+class Enemy extends Creature {
+	constructor(world, cell) {
+		super(world, cell);
+
+		this.cooldown = 4;
+		this.maxCooldown = 4;
+
+		this.movement = 2;
+
+		world.on('playerMoved', () => {
+			this.cooldown -= 1;
+
+			if (this.cooldown <= 0) {
+				this.action();
+				this.cooldown = this.maxCooldown;
+				this.world.emit('startActing', this);
+			}
+		});
+	}
+
+	action() {
+		this.world.emit('endActing', this);
+		console.log('Some action.');
+	}
+}
+
+class Skeleton extends Enemy {
 	constructor(world, cell) {
 		super(world, cell);
 
@@ -71,11 +97,39 @@ class Skeleton extends Creature {
 
 		this.setCell(cell);
 	}
+
+	action() {
+		let path = this.world.grid.path(this.cell, this.world.party.leader.cell, true);
+		path.cells = path.cells.slice(0, this.movement);
+
+		path.follow(cell => {
+			this.setCell(cell);
+		}, 80).then(() => this.world.emit('endActing', this));
+	}
 }
 
 const beings = {
 	Wall, Hero, Skeleton
 };
+
+class Path {
+	constructor(cells) {
+		this.cells = cells;
+	}
+
+	follow(callback, delay) {
+		return new Promise((resolve, reject) => {
+			let interval = setInterval(() => {
+				if (this.cells.length > 0) {
+					callback(this.cells.shift());
+				} else {
+					clearInterval(interval);
+					resolve();
+				}
+			}, delay);
+		});
+	}
+}
 
 class Grid {
 	constructor(world, width, height) {
@@ -106,7 +160,7 @@ class Grid {
 		return this.cells[y][x];
 	}
 
-	path(start, end) {
+	path(start, end, trimFirst = false) {
 		let nodes = new PF.Grid(this.width, this.height);
 
 		this.world.beings.items.forEach(being => {
@@ -115,7 +169,11 @@ class Grid {
 			}
 		});
 
-		return this.finder.findPath(start.x, start.y, end.x, end.y, nodes).map(coords => this.find(coords[0], coords[1]));
+		let path = new Path(this.finder.findPath(start.x, start.y, end.x, end.y, nodes).map(coords => this.find(coords[0], coords[1])));
+
+		if (trimFirst) path.cells = path.cells.splice(1);
+
+		return path;
 	}
 }
 
@@ -173,13 +231,22 @@ class World extends EventEmitter {
 
 		this.STATE_IDLE = 'idle';
 		this.STATE_WALKING = 'walking';
+		this.STATE_ENEMY = 'enemy';
 
 		this.scale = scale;
 		this.beings = new List();
 		this.graphics = new PIXI.Container();
 		this.viewing = null;
-		this.state = this.STATE_IDLE;
+		this.setState(this.STATE_IDLE);
 		this.party = null;
+
+		this.on('startActing', being => {
+			this.setState(this.STATE_ENEMY);
+		});
+
+		this.on('endActing', being => {
+			this.setState(this.STATE_IDLE);
+		});
 	}
 
 	setupGrid(width, height, scale) {
@@ -209,20 +276,15 @@ class World extends EventEmitter {
 			let cell = this.grid.find(x - this.graphics.x, y - this.graphics.y, this.scale);
 
 			if (cell) {
-				this.state = this.STATE_WALKING;
+				this.setState(this.STATE_WALKING);
 
-				let path = this.grid.path(this.party.leader.cell, cell).filter(cell => cell !== this.party.leader.cell);
+				let path = this.grid.path(this.party.leader.cell, cell, true);
 
-				let interval = setInterval(() => {
-					if (path.length > 0) {
-						let cell = path.shift();
-						this.party.moveTo(cell);
-						this.view(cell);
-					} else {
-						clearInterval(interval);
-						this.state = this.STATE_IDLE;
-					}
-				}, 80);
+				path.follow(cell => {
+					this.party.moveTo(cell);
+					this.view(cell);
+					this.emit('playerMoved', cell);
+				}, 80).then(() => this.setState(this.STATE_IDLE));
 			}
 		} else {
 			// Walking, probably.
@@ -301,6 +363,11 @@ class World extends EventEmitter {
 
 	findByType(type) {
 		return this.beings.items.filter(being => being instanceof type);
+	}
+
+	setState(state) {
+		this.state = state;
+		this.emit('state', state);
 	}
 
 	get hero() { return this.findByType(Hero)[0]; }
