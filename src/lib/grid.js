@@ -95,4 +95,6 @@ class Path extends CellGroup {
 
 		return this;
 	}
+
+	get length() { return this.cells.length; }
 }

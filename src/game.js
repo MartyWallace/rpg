@@ -2,6 +2,7 @@ const game = new Vue({
 	el: 'main',
 
 	data: {
+		canvas: null,
 		renderer: null,
 		stage: new PIXI.Container(),
 		world: new World(20, 24, DRAW_SCALE)
@@ -14,6 +15,18 @@ const game = new Vue({
 			this.renderer.render(this.stage);
 
 			window.requestAnimationFrame(this.update.bind(this));
+		},
+
+		handleMouse(event) {
+			let bounds = this.canvas.getBoundingClientRect();
+			let x = event.pageX - bounds.left;
+			let y = event.pageY - bounds.top;
+
+			if (event.type === 'click') this.world.handleClick(x, y);
+
+			if (event.type === 'mousemove') {
+				let cell = this.world.grid.find(x, y, DRAW_SCALE);
+			}
 		}
 	},
 
@@ -24,10 +37,10 @@ const game = new Vue({
 	},
 
 	mounted() {
-		let canvas = this.$el.querySelector('canvas');
+		this.canvas = this.$el.querySelector('canvas');
 
 		this.renderer = PIXI.autoDetectRenderer(DRAW_SCALE * 12, DRAW_SCALE * 10, {
-			view: canvas,
+			view: this.canvas,
 			backgroundColor: 0xAAAAAA
 		});
 
@@ -43,10 +56,8 @@ const game = new Vue({
 			]
 		});
 
-		canvas.addEventListener('click', event => {
-			let bounds = canvas.getBoundingClientRect();
-			this.world.handleClick(event.pageX - bounds.left, event.pageY - bounds.top);
-		});
+		this.canvas.addEventListener('click', event => this.handleMouse(event));
+		this.canvas.addEventListener('mousemove', event => this.handleMouse(event));
 
 		this.world.on('interact', cell => {
 			console.log(cell);

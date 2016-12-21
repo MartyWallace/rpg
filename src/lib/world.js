@@ -32,12 +32,16 @@ class Party extends EventEmitter {
 		}
 	}
 
-	get leader() {
-		return this.heroes.length > 0 ? this.heroes[0] : null;
+	randomHero() {
+		if (this.heroes.length > 0) {
+			return this.heroes[Math.floor(Math.random() * this.heroes.length)];
+		}
+
+		return null;
 	}
 
-	get followers() {
-		return this.heroes.filter(hero => hero !== this.leader);
+	get leader() {
+		return this.heroes.length > 0 ? this.heroes[0] : null;
 	}
 
 	get energy() {

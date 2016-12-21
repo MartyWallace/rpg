@@ -50,11 +50,26 @@ class Creature extends Being {
 		super(world, cell, def);
 
 		this.stats = {
-			health: 1,
-			maxhealth: 1,
-			energy: 5,
-			maxenergy: 5
+			health: 8,
+			maxhealth: 8,
+			energy: 3,
+			maxenergy: 3
 		};
+	}
+
+	takeDamage(amount) {
+		this.stats.health -= amount;
+
+		this.stats.health = Math.max(0, this.stats.health);
+		this.stats.health = Math.min(this.stats.health, this.stats.maxhealth);
+
+		if (this.stats.health <= 0) {
+			this.die();
+		}
+	}
+
+	die() {
+		console.log('dead');
 	}
 
 	get healthPercentage() {
@@ -87,11 +102,28 @@ class Enemy extends Creature {
 	constructor(world, cell, def) {
 		super(world, cell, def);
 
+		this.walkable = false;
 		this.movement = 2;
 	}
 
 	action() {
-		return new Promose((resolve, reject) => resolve());
+		return new Promise((resolve, reject) => {
+			let path = this.world.grid.path(this.cell, this.world.party.leader.cell, true);
+
+			if (path.length > 3) {
+				// Move.
+				path.limit(this.movement).follow(cell => {
+					this.setCell(cell);
+				}, 80).then(() => resolve());
+			} else {
+				// Attack.
+				this.attack().then(() => resolve());
+			}
+		});
+	}
+
+	attack() {
+		return new Promise((resolve, reject) => resolve());
 	}
 }
 
@@ -107,13 +139,10 @@ class Skeleton extends Enemy {
 		this.setCell(cell);
 	}
 
-	action() {
+	attack() {
 		return new Promise((resolve, reject) => {
-			let path = this.world.grid.path(this.cell, this.world.party.leader.cell, true).limit(this.movement);
-
-			path.follow(cell => {
-				this.setCell(cell);
-			}, 80).then(() => resolve());
+			this.world.party.randomHero().takeDamage(1);
+			resolve();
 		});
 	}
 }
