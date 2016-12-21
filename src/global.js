@@ -16,7 +16,8 @@ const LEVELS = [
 			{ type: 'Wall', x: 24, y: 7 },
 			{ type: 'Wall', x: 25, y: 7 },
 			{ type: 'Skeleton', x: 10, y: 7 },
-			{ type: 'Skeleton', x: 10, y: 18 }
+			{ type: 'Skeleton', x: 10, y: 18 },
+			{ type: 'Skeleton', x: 20, y: 9 }
 		]
 	}
 ];

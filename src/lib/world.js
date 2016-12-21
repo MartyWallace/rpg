@@ -3,8 +3,8 @@ class Party extends EventEmitter {
 		super();
 
 		this.heroes = heroes;
-		this.moves = 10;
-		this.maxmoves = 10;
+		this.moves = 7;
+		this.maxmoves = 7;
 	}
 
 	moveTo(cell) {
@@ -59,6 +59,7 @@ class World extends EventEmitter {
 		this.viewing = null;
 		this.setState(this.STATE_IDLE);
 		this.party = null;
+		this.enemyActionQueue = [];
 
 		this.on('startActing', being => {
 			this.setState(this.STATE_ENEMY);
@@ -230,16 +231,17 @@ class World extends EventEmitter {
 
 	moveEnemies() {
 		this.state = this.STATE_ENEMY;
+		this.enemyActionQueue = this.findByType(Enemy).map(enemy => enemy.action.bind(enemy));
 
-		let actions = [];
+		this.nextEnemyAction();
+	}
 
-		this.findByType(Enemy).forEach(enemy => {
-			actions.push(enemy.action());
-		});
-
-		Promise.all(actions).then(values => {
+	nextEnemyAction() {
+		if (this.enemyActionQueue.length > 0) {
+			this.enemyActionQueue.pop()().then(() => this.nextEnemyAction());
+		} else {
 			this.state = this.STATE_IDLE;
 			console.log('done');
-		});
+		}
 	}
 }
