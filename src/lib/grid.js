@@ -89,4 +89,10 @@ class Path extends CellGroup {
 			}, delay);
 		});
 	}
+
+	limit(length) {
+		this.cells = this.cells.slice(0, length);
+
+		return this;
+	}
 }

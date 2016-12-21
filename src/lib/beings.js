@@ -51,8 +51,18 @@ class Creature extends Being {
 
 		this.stats = {
 			health: 1,
-			maxhealth: 1
+			maxhealth: 1,
+			energy: 5,
+			maxenergy: 5
 		};
+	}
+
+	get healthPercentage() {
+		return this.stats.health / this.stats.maxhealth;
+	}
+
+	get energyPercentage() {
+		return this.stats.energy / this.stats.maxenergy;
 	}
 }
 
@@ -77,24 +87,11 @@ class Enemy extends Creature {
 	constructor(world, cell, def) {
 		super(world, cell, def);
 
-		this.cooldown = 4;
-		this.maxCooldown = 4;
-
 		this.movement = 2;
-
-		world.on('playerMoved', () => {
-			this.cooldown -= 1;
-
-			if (this.cooldown <= 0) {
-				this.action();
-				this.cooldown = this.maxCooldown;
-				this.world.emit('startActing', this);
-			}
-		});
 	}
 
 	action() {
-		this.world.emit('endActing', this);
+		return new Promose((resolve, reject) => resolve());
 	}
 }
 
@@ -111,12 +108,13 @@ class Skeleton extends Enemy {
 	}
 
 	action() {
-		let path = this.world.grid.path(this.cell, this.world.party.leader.cell, true);
-		path.cells = path.cells.slice(0, this.movement);
+		return new Promise((resolve, reject) => {
+			let path = this.world.grid.path(this.cell, this.world.party.leader.cell, true).limit(this.movement);
 
-		path.follow(cell => {
-			this.setCell(cell);
-		}, 80).then(() => this.world.emit('endActing', this));
+			path.follow(cell => {
+				this.setCell(cell);
+			}, 80).then(() => resolve());
+		});
 	}
 }
 

@@ -1,22 +1,35 @@
-class Party {
+class Party extends EventEmitter {
 	constructor(heroes) {
+		super();
+
 		this.heroes = heroes;
+		this.moves = 10;
+		this.maxmoves = 10;
 	}
 
 	moveTo(cell) {
-		let last = null;
+		if (this.moves > 0) {
+			let last = null;
 
-		this.heroes.forEach(hero => {
-			if (last === null) {
-				hero.setCell(cell);
-			} else {
-				if (last.prevCell) {
-					hero.setCell(last.prevCell);
+			this.heroes.forEach(hero => {
+				if (last === null) {
+					hero.setCell(cell);
+				} else {
+					if (last.prevCell) {
+						hero.setCell(last.prevCell);
+					}
 				}
-			}
 
-			last = hero;
-		});
+				last = hero;
+			});
+
+			this.moves -= 1;
+
+			if (this.moves <= 0) {
+				this.emit('usedMoves');
+				this.moves = this.maxmoves;
+			}
+		}
 	}
 
 	get leader() {
@@ -25,6 +38,10 @@ class Party {
 
 	get followers() {
 		return this.heroes.filter(hero => hero !== this.leader);
+	}
+
+	get energy() {
+		return this.heroes.reduce((t, hero) => t + hero.stats.energy, 0);
 	}
 }
 
@@ -82,7 +99,7 @@ class World extends EventEmitter {
 				if (cell.empty) {
 					this.setState(this.STATE_WALKING);
 
-					let path = this.grid.path(this.party.leader.cell, cell, true);
+					let path = this.grid.path(this.party.leader.cell, cell, true).limit(this.party.moves);
 
 					path.follow(cell => {
 						this.party.moveTo(cell);
@@ -162,6 +179,7 @@ class World extends EventEmitter {
 		});
 
 		this.party = new Party(heroes);
+		this.party.on('usedMoves', this.moveEnemies.bind(this));
 
 		this.view(this.party.leader.cell);
 
@@ -169,6 +187,10 @@ class World extends EventEmitter {
 	}
 
 	unload() {
+		if (this.party) {
+			this.party.off('usedMoves');
+		}
+
 		this.beings.items.forEach(being => this.destroy(being));
 		this.emit('unload');
 	}
@@ -204,5 +226,20 @@ class World extends EventEmitter {
 	setState(state) {
 		this.state = state;
 		this.emit('state', state);
+	}
+
+	moveEnemies() {
+		this.state = this.STATE_ENEMY;
+
+		let actions = [];
+
+		this.findByType(Enemy).forEach(enemy => {
+			actions.push(enemy.action());
+		});
+
+		Promise.all(actions).then(values => {
+			this.state = this.STATE_IDLE;
+			console.log('done');
+		});
 	}
 }

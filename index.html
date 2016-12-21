@@ -19,13 +19,23 @@
 									{{ hero.def.data.name }}
 								</div>
 								<div class="status">
-									<div class="hp">
-										<div :style="'width:' + (hero.stats.health / hero.stats.maxHealth) + '%'"></div>
+									<div class="bar hp">
+										<div :style="'width:' + (hero.healthPercentage * 100) + '%'"></div>
+										<span>{{ hero.stats.health }} HP</span>
+									</div>
+									<div class="bar energy">
+										<div :style="'width:' + (hero.energyPercentage * 100) + '%'"></div>
+										<span>{{ hero.stats.energy }} MP</span>
 									</div>
 								</div>
 							</div>
 						</li>
 					</ul>
+
+					<div class="bar moves" v-if="world.party">
+						<div :style="'width:' + (world.party.moves / world.party.maxmoves * 100) + '%'"></div>
+						<span>{{ world.party.moves }} moves</span>
+					</div>
 				</section>
 			</aside>
 		</main>
