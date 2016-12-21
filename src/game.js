@@ -19,13 +19,16 @@ const game = new Vue({
 
 		handleMouse(event) {
 			let bounds = this.canvas.getBoundingClientRect();
-			let x = event.pageX - bounds.left;
-			let y = event.pageY - bounds.top;
+			let cell = this.world.grid.find(
+				event.pageX - bounds.left - this.world.graphics.x,
+				event.pageY - bounds.top - this.world.graphics.y,
+				DRAW_SCALE
+			);
 
-			if (event.type === 'click') this.world.handleClick(x, y);
+			if (event.type === 'click') this.world.handleClick(cell);
 
 			if (event.type === 'mousemove') {
-				let cell = this.world.grid.find(x, y, DRAW_SCALE);
+				//
 			}
 		}
 	},

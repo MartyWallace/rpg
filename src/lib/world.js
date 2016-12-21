@@ -96,10 +96,8 @@ class World extends EventEmitter {
 		}
 	}
 
-	handleClick(x, y) {
+	handleClick(cell) {
 		if (this.state === this.STATE_IDLE) {
-			let cell = this.grid.find(x - this.graphics.x, y - this.graphics.y, this.scale);
-
 			if (cell) {
 				if (cell.empty) {
 					this.setState(this.STATE_WALKING);
