@@ -9,41 +9,13 @@
 	<body>
 		<main>
 			<canvas></canvas>
-
-			<aside>
-				<section class="party">
-					<ul>
-						<li v-for="hero in heroes">
-							<div class="hero">
-								<div class="profile">
-									{{ hero.def.data.name }}
-								</div>
-								<div class="status">
-									<div class="bar hp">
-										<div :style="'width:' + (hero.healthPercentage * 100) + '%'"></div>
-										<span>{{ hero.stats.health }} HP</span>
-									</div>
-									<div class="bar energy">
-										<div :style="'width:' + (hero.energyPercentage * 100) + '%'"></div>
-										<span>{{ hero.stats.energy }} MP</span>
-									</div>
-								</div>
-							</div>
-						</li>
-					</ul>
-
-					<div class="bar moves" v-if="world.party">
-						<div :style="'width:' + (world.party.moves / world.party.maxmoves * 100) + '%'"></div>
-						<span>{{ world.party.moves }} moves</span>
-					</div>
-				</section>
-			</aside>
 		</main>
 
 		<script src="./bower_components/pixi.js/dist/pixi.min.js"></script>
 		<script src="./bower_components/eventEmitter/EventEmitter.min.js"></script>
 		<script src="./bower_components/pathfinding/pathfinding-browser.min.js"></script>
-		<script src="./bower_components/vue/dist/vue.js"></script>
 		<script src="./dist/main.js"></script>
+
+		<script>game.init();</script>
 	</body>
 </html>

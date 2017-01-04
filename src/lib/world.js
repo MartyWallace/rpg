@@ -3,33 +3,6 @@ class Party extends EventEmitter {
 		super();
 
 		this.heroes = heroes;
-		this.moves = 7;
-		this.maxmoves = 7;
-	}
-
-	moveTo(cell) {
-		if (this.moves > 0) {
-			let last = null;
-
-			this.heroes.forEach(hero => {
-				if (last === null) {
-					hero.setCell(cell);
-				} else {
-					if (last.prevCell) {
-						hero.setCell(last.prevCell);
-					}
-				}
-
-				last = hero;
-			});
-
-			this.moves -= 1;
-
-			if (this.moves <= 0) {
-				this.emit('usedMoves');
-				this.moves = this.maxmoves;
-			}
-		}
 	}
 
 	randomHero() {
@@ -43,10 +16,6 @@ class Party extends EventEmitter {
 	get leader() {
 		return this.heroes.length > 0 ? this.heroes[0] : null;
 	}
-
-	get energy() {
-		return this.heroes.reduce((t, hero) => t + hero.stats.energy, 0);
-	}
 }
 
 class World extends EventEmitter {
@@ -55,7 +24,6 @@ class World extends EventEmitter {
 
 		this.STATE_IDLE = 'idle';
 		this.STATE_WALKING = 'walking';
-		this.STATE_ENEMY = 'enemy';
 
 		this.scale = scale;
 		this.beings = new List();
@@ -63,15 +31,6 @@ class World extends EventEmitter {
 		this.viewing = null;
 		this.setState(this.STATE_IDLE);
 		this.party = null;
-		this.enemyActionQueue = [];
-
-		this.on('startActing', being => {
-			this.setState(this.STATE_ENEMY);
-		});
-
-		this.on('endActing', being => {
-			this.setState(this.STATE_IDLE);
-		});
 	}
 
 	setupGrid(width, height, scale) {
@@ -82,6 +41,7 @@ class World extends EventEmitter {
 		for (let x = 0; x < width; x++ ) {
 			for (let y = 0; y < height; y++) {
 				let box = new PIXI.Graphics();
+
 				box.beginFill(light ? 0x666666 : 0x606060);
 				box.drawRect(0, 0, scale, scale);
 				box.position.set(x * scale, y * scale);
@@ -102,17 +62,24 @@ class World extends EventEmitter {
 				if (cell.empty) {
 					this.setState(this.STATE_WALKING);
 
-					let path = this.grid.path(this.party.leader.cell, cell, true).limit(this.party.moves);
+					let path = this.grid.path(this.party.leader.cell, cell, true);
 
 					path.follow(cell => {
-						this.party.moveTo(cell);
+						this.party.leader.setCell(cell);
 						this.view(cell);
-						this.emit('playerMoved', cell);
-					}, 80).then(() => this.setState(this.STATE_IDLE));
+
+						// Randomly provide new battle.
+						// ...
+
+						return { continue: true };
+
+					}, 80).then(data => {
+						if (data === null) this.setState(this.STATE_IDLE);
+						else this.setState(data.state);
+					});
 				} else {
 					// Interact with cell.
 					this.emit('interact', cell);
-					console.log('TODO: Interaction for cell.');
 				}
 			}
 		} else {
@@ -182,18 +149,12 @@ class World extends EventEmitter {
 		});
 
 		this.party = new Party(heroes);
-		this.party.on('usedMoves', this.moveEnemies.bind(this));
-
 		this.view(this.party.leader.cell);
 
 		this.emit('load');
 	}
 
 	unload() {
-		if (this.party) {
-			this.party.off('usedMoves');
-		}
-
 		this.beings.items.forEach(being => this.destroy(being));
 		this.emit('unload');
 	}
@@ -229,21 +190,5 @@ class World extends EventEmitter {
 	setState(state) {
 		this.state = state;
 		this.emit('state', state);
-	}
-
-	moveEnemies() {
-		this.state = this.STATE_ENEMY;
-		this.enemyActionQueue = this.findByType(Enemy).map(enemy => enemy.action.bind(enemy));
-
-		this.nextEnemyAction();
-	}
-
-	nextEnemyAction() {
-		if (this.enemyActionQueue.length > 0) {
-			this.enemyActionQueue.pop()().then(() => this.nextEnemyAction());
-		} else {
-			this.state = this.STATE_IDLE;
-			console.log('done');
-		}
 	}
 }

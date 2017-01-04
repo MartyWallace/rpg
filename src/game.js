@@ -1,53 +1,18 @@
-const game = new Vue({
-	el: 'main',
+const canvas = document.querySelector('canvas');
+const stage = new PIXI.Container();
 
-	data: {
-		canvas: null,
-		renderer: null,
-		stage: new PIXI.Container(),
-		world: new World(20, 24, DRAW_SCALE)
-	},
+const renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT, {
+	view: canvas,
+	backgroundColor: 0xAAAAAA
+});
 
-	methods: {
-		update() {
-			this.world.update();
+const game = {
+	world: null,
 
-			this.renderer.render(this.stage);
+	init() {
+		this.world = new World(20, 24, DRAW_SCALE);
 
-			window.requestAnimationFrame(this.update.bind(this));
-		},
-
-		handleMouse(event) {
-			let bounds = this.canvas.getBoundingClientRect();
-			let cell = this.world.grid.find(
-				event.pageX - bounds.left - this.world.graphics.x,
-				event.pageY - bounds.top - this.world.graphics.y,
-				DRAW_SCALE
-			);
-
-			if (event.type === 'click') this.world.handleClick(cell);
-
-			if (event.type === 'mousemove') {
-				//
-			}
-		}
-	},
-
-	computed: {
-		heroes() {
-			return this.world.party ? this.world.party.heroes : [];
-		}
-	},
-
-	mounted() {
-		this.canvas = this.$el.querySelector('canvas');
-
-		this.renderer = PIXI.autoDetectRenderer(DRAW_SCALE * 12, DRAW_SCALE * 10, {
-			view: this.canvas,
-			backgroundColor: 0xAAAAAA
-		});
-
-		this.stage.addChild(this.world.graphics);
+		stage.addChild(this.world.graphics);
 		
 		this.world.load(LEVELS[0], {
 			x: 1,
@@ -59,13 +24,36 @@ const game = new Vue({
 			]
 		});
 
-		this.canvas.addEventListener('click', event => this.handleMouse(event));
-		this.canvas.addEventListener('mousemove', event => this.handleMouse(event));
+		canvas.addEventListener('click', event => this.handleMouse(event));
+		canvas.addEventListener('mousemove', event => this.handleMouse(event));
 
 		this.world.on('interact', cell => {
 			console.log(cell);
 		});
 
 		this.update();
+	},
+
+	update() {
+		this.world.update();
+		renderer.render(stage);
+
+		window.requestAnimationFrame(this.update.bind(this));
+	},
+
+	handleMouse(event) {
+		let bounds = canvas.getBoundingClientRect();
+
+		let cell = this.world.grid.find(
+			event.pageX - bounds.left - this.world.graphics.x,
+			event.pageY - bounds.top - this.world.graphics.y,
+			DRAW_SCALE
+		);
+
+		if (event.type === 'click') this.world.handleClick(cell);
+
+		if (event.type === 'mousemove') {
+			//
+		}
 	}
-});
+}
