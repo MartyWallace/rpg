@@ -71,7 +71,7 @@ class Creature extends Being {
 		}
 	}
 
-	action() {
+	action(battle) {
 		return new Promise(resolve => resolve());
 	}
 
@@ -98,10 +98,12 @@ class Hero extends Creature {
 		this.setCell(cell);
 	}
 
-	action() {
+	action(battle) {
 		return new Promise(resolve => {
-			console.log('Awaiting hero turn.');
-			setTimeout(resolve, 1000);
+			game.ui.showHeroActions(this, battle).then(selection => {
+				if (selection === 'Attack') battle.randomEnemy().takeDamage(1);
+				resolve();
+			});
 		});
 	}
 
@@ -130,10 +132,14 @@ class Skeleton extends Enemy {
 		this.setCell(cell);
 	}
 
-	action() {
+	action(battle) {
 		return new Promise(resolve => {
-			console.log('Skeleton turn.');
-			setTimeout(resolve, 1000);
+			setTimeout(() => {
+				let hero = battle.randomHero();
+				hero.takeDamage(1);
+
+				resolve();
+			}, 1000);
 		});
 	}
 }

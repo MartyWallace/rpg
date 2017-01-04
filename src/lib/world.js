@@ -5,12 +5,17 @@ class Party extends EventEmitter {
 		this.heroes = heroes;
 	}
 
-	randomHero() {
-		if (this.heroes.length > 0) {
-			return this.heroes[Math.floor(Math.random() * this.heroes.length)];
-		}
+	setCell(cell) {
+		let last = cell;
 
-		return null;
+		this.heroes.forEach(hero => {
+			hero.setCell(last);
+			last = hero.prevCell;
+		});
+	}
+
+	randomHero() {
+		return Utils.Random.fromArray(this.heroes);
 	}
 
 	get leader() {
@@ -30,6 +35,23 @@ class Battle extends EventEmitter {
 		this.timeline = this.creatures.map(creature => {
 			return { creature, count: 0 };
 		});
+
+		this.enemies.forEach(enemy => {
+			enemy.on('die', () => this.removeEnemy(enemy));
+		});
+	}
+
+	removeEnemy(enemy) {
+		game.world.destroy(enemy);
+
+		this.enemies.splice(this.enemies.indexOf(enemy), 1);
+		this.creatures.splice(this.creatures.indexOf(enemy), 1);
+
+		for (let i = 0; i < this.timeline.length; i++) {
+			if (this.timeline[i].creature === enemy) {
+				this.timeline.splice(i, 1);
+			}
+		}
 	}
 
 	start() {
@@ -60,7 +82,7 @@ class Battle extends EventEmitter {
 			if (next) {
 				this.world.view(next.cell);
 
-				next.action().then(r => this.action());
+				next.action(this).then(r => this.action());
 			} else {
 				// This should never happen.
 				console.warn('Somehow ended up in a stuck battle.');
@@ -74,6 +96,14 @@ class Battle extends EventEmitter {
 
 	defeat() {
 		this.emit('defeat');
+	}
+
+	randomEnemy() {
+		return Utils.Random.fromArray(this.enemies);
+	}
+
+	randomHero() {
+		return Utils.Random.fromArray(this.heroes);
 	}
 }
 
@@ -129,7 +159,7 @@ class World extends EventEmitter {
 
 					path.follow(cell => {
 						return new Promise((resolve, reject) => {
-							this.party.leader.setCell(cell);
+							this.party.setCell(cell);
 							this.view(cell);
 
 							this.nextBattle -= 1;
@@ -145,9 +175,6 @@ class World extends EventEmitter {
 						if (battle) this.startBattle();
 						else this.setState(this.STATE_IDLE);
 					});
-				} else {
-					// Interact with cell.
-					this.emit('interact', cell);
 				}
 			}
 		} else if (this.state === this.STATE_WALKING) {
@@ -157,6 +184,8 @@ class World extends EventEmitter {
 			// Might want some special actions if in the battle state.
 			// ...
 		}
+
+		this.emit('interact', cell);
 	}
 
 	startBattle() {
@@ -177,6 +206,16 @@ class World extends EventEmitter {
 
 			this.battle = new Battle(this, this.party.heroes, enemies);
 			this.battle.start();
+
+			this.battle.on('victory', () => {
+				console.log('victory');
+
+				this.battle = null;
+
+				setTimeout(() => this.setState(this.STATE_IDLE), 100);
+			});
+
+			this.emit('startBattle', this.battle);
 		} else {
 			// No enemies to spawn, do nothing.
 			// ...

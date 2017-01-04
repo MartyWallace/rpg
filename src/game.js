@@ -8,11 +8,14 @@ const renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT, {
 
 const game = {
 	world: null,
+	ui: null,
 
 	init() {
 		this.world = new World(20, 24, DRAW_SCALE);
+		this.ui = new UI();
 
 		stage.addChild(this.world.graphics);
+		stage.addChild(this.ui.graphics);
 		
 		this.world.load(LEVELS[0], {
 			x: 1,
@@ -26,10 +29,6 @@ const game = {
 
 		canvas.addEventListener('click', event => this.handleMouse(event));
 		canvas.addEventListener('mousemove', event => this.handleMouse(event));
-
-		this.world.on('interact', cell => {
-			console.log(cell);
-		});
 
 		this.update();
 	},
