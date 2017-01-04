@@ -18,6 +18,65 @@ class Party extends EventEmitter {
 	}
 }
 
+class Battle extends EventEmitter {
+	constructor(world, heroes, enemies) {
+		super();
+
+		this.world = world;
+		this.heroes = heroes;
+		this.enemies = enemies;
+		this.creatures = heroes.concat(enemies);
+
+		this.timeline = this.creatures.map(creature => {
+			return { creature, count: 0 };
+		});
+	}
+
+	start() {
+		this.action();
+	}
+
+	next() {
+		while (true) {
+			for (let entity of this.timeline) {
+				entity.count += entity.creature.wait;
+
+				if (entity.count >= 100) {
+					entity.count = 0;
+					return entity.creature;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	action() {
+		if (this.enemies.length === 0) this.victory();
+		else if (this.heroes.length === 0) this.defeat();
+		else {
+			let next = this.next();
+
+			if (next) {
+				this.world.view(next.cell);
+
+				next.action().then(r => this.action());
+			} else {
+				// This should never happen.
+				console.warn('Somehow ended up in a stuck battle.');
+			}
+		}
+	}
+
+	victory() {
+		this.emit('victory');
+	}
+
+	defeat() {
+		this.emit('defeat');
+	}
+}
+
 class World extends EventEmitter {
 	constructor(width, height, scale = 40) {
 		super();
@@ -34,7 +93,7 @@ class World extends EventEmitter {
 		this.party = null;
 		this.level = null;
 		this.nextBattle = 10;
-		this.enemies = [];
+		this.battle = null;
 	}
 
 	setupGrid(width, height, scale) {
@@ -105,22 +164,19 @@ class World extends EventEmitter {
 			this.nextBattle = 20 + Math.round(Math.random() * 20);
 			this.setState(this.STATE_BATTLE);
 
-			this.enemies = [];
-
+			let enemies = [];
 			let amount = Math.round(Utils.Random.between(2, 4));
 
-			while (this.enemies.length < amount) {
+			while (enemies.length < amount) {
 				let def = Utils.Random.fromArray(this.level.enemies);
 				let cell = this.grid.cluster(this.party.leader.cell, 4).filter(cell => cell.empty).randomCell();
-
-				console.log(cell);
-
 				let enemy = this.create({ type: def.type, x: cell.x, y: cell.y });
 
-				this.enemies.push(enemy);
+				enemies.push(enemy);
 			}
 
-			console.log('To battle!');
+			this.battle = new Battle(this, this.party.heroes, enemies);
+			this.battle.start();
 		} else {
 			// No enemies to spawn, do nothing.
 			// ...

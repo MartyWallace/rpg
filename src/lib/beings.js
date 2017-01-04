@@ -1,5 +1,7 @@
-class Being {
+class Being extends EventEmitter {
 	constructor(world, cell, def) {
+		super();
+
 		this.world = world;
 		this.cell = cell;
 		this.def = def;
@@ -50,10 +52,9 @@ class Creature extends Being {
 		super(world, cell, def);
 
 		this.stats = {
-			health: 8,
-			maxhealth: 8,
-			energy: 3,
-			maxenergy: 3
+			health: 1,
+			maxhealth: 1,
+			wait: 1
 		};
 
 		this.walkable = false;
@@ -70,16 +71,16 @@ class Creature extends Being {
 		}
 	}
 
+	action() {
+		return new Promise(resolve => resolve());
+	}
+
 	die() {
-		console.log('dead');
+		this.emit('die');
 	}
 
 	get healthPercentage() {
 		return this.stats.health / this.stats.maxhealth;
-	}
-
-	get energyPercentage() {
-		return this.stats.energy / this.stats.maxenergy;
 	}
 }
 
@@ -87,12 +88,21 @@ class Hero extends Creature {
 	constructor(world, cell, def) {
 		super(world, cell, def);
 
+		this.wait = 5;
+
 		this.graphics = new PIXI.Graphics();
 		this.graphics.beginFill(def.data.attrs.color);
 		this.graphics.drawRect(0, 0, world.scale, world.scale);
 		this.graphics.endFill();
 
 		this.setCell(cell);
+	}
+
+	action() {
+		return new Promise(resolve => {
+			console.log('Awaiting hero turn.');
+			setTimeout(resolve, 1000);
+		});
 	}
 
 	save() {
@@ -103,34 +113,14 @@ class Hero extends Creature {
 class Enemy extends Creature {
 	constructor(world, cell, def) {
 		super(world, cell, def);
-		
-		this.movement = 2;
-	}
-
-	action() {
-		return new Promise((resolve, reject) => {
-			let path = this.world.grid.path(this.cell, this.world.party.leader.cell, true);
-
-			if (path.length > 3) {
-				// Move.
-				path.limit(this.movement).follow(cell => {
-					this.setCell(cell);
-				}, 80).then(() => resolve());
-			} else {
-				// Attack.
-				this.attack().then(() => resolve());
-			}
-		});
-	}
-
-	attack() {
-		return new Promise((resolve, reject) => resolve());
 	}
 }
 
 class Skeleton extends Enemy {
 	constructor(world, cell, def) {
 		super(world, cell, def);
+
+		this.wait = 6;
 
 		this.graphics = new PIXI.Graphics();
 		this.graphics.beginFill(0x00CC22);
@@ -140,10 +130,10 @@ class Skeleton extends Enemy {
 		this.setCell(cell);
 	}
 
-	attack() {
-		return new Promise((resolve, reject) => {
-			this.world.party.randomHero().takeDamage(1);
-			resolve();
+	action() {
+		return new Promise(resolve => {
+			console.log('Skeleton turn.');
+			setTimeout(resolve, 1000);
 		});
 	}
 }
