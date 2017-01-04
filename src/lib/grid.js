@@ -77,35 +77,24 @@ class Path extends CellGroup {
 		super(cells);
 	}
 
-	/**
-	 * Sequentially work with the series of cells that this path represents, executing a callback
-	 * for each cell that accepts the cell being worked with.
-	 * 
-	 * @param {Function} callback The callback function to call for each cell in the path. The
-	 * callback accepts a Cell instance and should return an object with a "continue" property that
-	 * determines whether the path should continue to be followed or whether the sequence should be
-	 * terminated. The return value can also have a "data" property attached, which will be provided
-	 * to the resolve function of the Promise returned by this method in the case where the path was
-	 * terminated. If the end of the path is reached, null will be provided in its place.
-	 * @param delay The millisecond delay between each execution of the callback.
-	 * 
-	 * @return {Promise}
-	 */
-	follow(callback, delay) {
+	follow(callback) {
 		return new Promise((resolve, reject) => {
-			let interval = setInterval(() => {
-				if (this.cells.length > 0) {
-					let result = callback(this.cells.shift());
+			let path = this.cells.slice();
 
-					if (!('continue' in result) || !result.continue) {
-						clearInterval(interval);
-						resolve(('data' in result) ? result.data : null);
-					}
+			let next = (last) => {
+				if (typeof last === 'undefined') last = null;
+
+				if (path.length > 0) {
+					let promise = callback(path.shift());
+
+					if (promise) promise.then(data => next(data)).catch(data => resolve(data));
+					else resolve(last);
 				} else {
-					clearInterval(interval);
-					resolve(null);
+					resolve(last);
 				}
-			}, delay);
+			};
+
+			next(null);
 		});
 	}
 

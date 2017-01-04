@@ -65,17 +65,19 @@ class World extends EventEmitter {
 					let path = this.grid.path(this.party.leader.cell, cell, true);
 
 					path.follow(cell => {
-						this.party.leader.setCell(cell);
-						this.view(cell);
+						return new Promise((resolve, reject) => {
+							this.party.leader.setCell(cell);
+							this.view(cell);
 
-						// Randomly provide new battle.
-						// ...
+							// Randomly provide new battle.
+							// ...
 
-						return { continue: true };
+							setTimeout(resolve.bind(undefined, 'hello'), 80);
+						});
 
-					}, 80).then(data => {
-						if (data === null) this.setState(this.STATE_IDLE);
-						else this.setState(data.state);
+					}).then(data => {
+						console.log(data);
+						this.setState(this.STATE_IDLE);
 					});
 				} else {
 					// Interact with cell.
