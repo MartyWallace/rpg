@@ -24,6 +24,7 @@ class World extends EventEmitter {
 
 		this.STATE_IDLE = 'idle';
 		this.STATE_WALKING = 'walking';
+		this.STATE_BATTLE = 'battle';
 
 		this.scale = scale;
 		this.beings = new List();
@@ -31,6 +32,9 @@ class World extends EventEmitter {
 		this.viewing = null;
 		this.setState(this.STATE_IDLE);
 		this.party = null;
+		this.level = null;
+		this.nextBattle = 10;
+		this.enemies = [];
 	}
 
 	setupGrid(width, height, scale) {
@@ -62,30 +66,64 @@ class World extends EventEmitter {
 				if (cell.empty) {
 					this.setState(this.STATE_WALKING);
 
-					let path = this.grid.path(this.party.leader.cell, cell, true);
+					let path = this.grid.path(this.party.leader.cell, cell).shift();
 
 					path.follow(cell => {
 						return new Promise((resolve, reject) => {
 							this.party.leader.setCell(cell);
 							this.view(cell);
 
-							// Randomly provide new battle.
-							// ...
+							this.nextBattle -= 1;
 
-							setTimeout(resolve.bind(undefined, 'hello'), 80);
+							if (this.nextBattle <= 0) {
+								reject(true);
+							} else {
+								setTimeout(resolve.bind(), 80);
+							}
 						});
 
-					}).then(data => {
-						console.log(data);
-						this.setState(this.STATE_IDLE);
+					}).then(battle => {
+						if (battle) this.startBattle();
+						else this.setState(this.STATE_IDLE);
 					});
 				} else {
 					// Interact with cell.
 					this.emit('interact', cell);
 				}
 			}
+		} else if (this.state === this.STATE_WALKING) {
+			// Shouldn't do anything while walking - unless maybe it stops the current walk?
+			// ...
+		} else if (this.state === this.STATE_BATTLE) {
+			// Might want some special actions if in the battle state.
+			// ...
+		}
+	}
+
+	startBattle() {
+		if ('enemies' in this.level && this.level.enemies.length > 0) {
+			this.nextBattle = 20 + Math.round(Math.random() * 20);
+			this.setState(this.STATE_BATTLE);
+
+			this.enemies = [];
+
+			let amount = Math.round(Utils.Random.between(2, 4));
+
+			while (this.enemies.length < amount) {
+				let def = Utils.Random.fromArray(this.level.enemies);
+				let cell = this.grid.cluster(this.party.leader.cell, 4).filter(cell => cell.empty).randomCell();
+
+				console.log(cell);
+
+				let enemy = this.create({ type: def.type, x: cell.x, y: cell.y });
+
+				this.enemies.push(enemy);
+			}
+
+			console.log('To battle!');
 		} else {
-			// Walking, probably.
+			// No enemies to spawn, do nothing.
+			// ...
 		}
 	}
 
@@ -136,10 +174,10 @@ class World extends EventEmitter {
 	load(level, party) {
 		this.unload();
 
-		if (typeof level === 'string') {
-			level = JSON.parse(level);
-		}
+		// Allow raw JSON strings to be provided.
+		if (typeof level === 'string') level = JSON.parse(level);
 
+		this.level = level;
 		this.setupGrid(level.width, level.height, this.scale);
 
 		level.beings.forEach(def => this.create(def));

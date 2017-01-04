@@ -27,7 +27,7 @@ class Grid {
 		return this.cells[y][x];
 	}
 
-	path(start, end, trimFirst = false) {
+	path(start, end) {
 		let nodes = new PF.Grid(this.width, this.height);
 
 		this.world.beings.items.forEach(being => {
@@ -36,11 +36,20 @@ class Grid {
 			}
 		});
 
-		let path = new Path(this.finder.findPath(start.x, start.y, end.x, end.y, nodes).map(coords => this.find(coords[0], coords[1])));
+		return new Path(this.finder.findPath(start.x, start.y, end.x, end.y, nodes).map(coords => this.find(coords[0], coords[1])));
+	}
 
-		if (trimFirst) path.cells = path.cells.splice(1);
+	cluster(origin, radius) {
+		let cells = [];
 
-		return path;
+		for (let x = 0; x < this.width; x++) {
+			for (let y = 0; y < this.height; y++) {
+				let cell = this.find(x, y);
+				if (cell.distanceTo(origin) < radius) cells.push(cell);
+			}
+		}
+
+		return new Cluster(cells);
 	}
 }
 
@@ -49,6 +58,13 @@ class Cell {
 		this.grid = grid;
 		this.x = x;
 		this.y = y;
+	}
+
+	distanceTo(cell) {
+		let a = cell.x - this.x;
+		let b = cell.y - this.y;
+
+		return Math.sqrt(a * a + b * b);
 	}
 
 	get content() {
@@ -70,6 +86,18 @@ class CellGroup {
 	constructor(cells) {
 		this.cells = cells;
 	}
+
+	filter(callback) {
+		this.cells = this.cells.filter(callback);
+
+		return this;
+	}
+
+	randomCell() {
+		return Utils.Random.fromArray(this.cells);
+	}
+
+	get length() { return this.cells.length; }
 }
 
 class Path extends CellGroup {
@@ -82,6 +110,7 @@ class Path extends CellGroup {
 			let path = this.cells.slice();
 
 			let next = (last) => {
+				// Force null for cleaner results and consistency.
 				if (typeof last === 'undefined') last = null;
 
 				if (path.length > 0) {
@@ -104,5 +133,15 @@ class Path extends CellGroup {
 		return this;
 	}
 
-	get length() { return this.cells.length; }
+	shift(count = 1) {
+		this.cells = this.cells.slice(count);
+
+		return this;
+	}
+}
+
+class Cluster extends CellGroup {
+	constructor(cells) {
+		super(cells);
+	}
 }

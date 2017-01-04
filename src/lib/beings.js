@@ -55,6 +55,8 @@ class Creature extends Being {
 			energy: 3,
 			maxenergy: 3
 		};
+
+		this.walkable = false;
 	}
 
 	takeDamage(amount) {
@@ -101,8 +103,7 @@ class Hero extends Creature {
 class Enemy extends Creature {
 	constructor(world, cell, def) {
 		super(world, cell, def);
-
-		this.walkable = false;
+		
 		this.movement = 2;
 	}
 
