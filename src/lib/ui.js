@@ -78,7 +78,7 @@ class UI {
 		let display = new PIXI.Text(amount, { fill: 0x000000 });
 		display.position.set(creature.cell.x * game.world.scale, creature.cell.y * game.world.scale);
 
-		game.world.graphics.addChild(display);
+		game.world.layer('ui').addChild(display);
 
 		setTimeout(() => display.parent.removeChild(display), 1000);
 	}

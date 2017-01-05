@@ -10,6 +10,7 @@ class Being extends EventEmitter {
 		this.walkable = true;
 
 		this.name = '';
+		this.layer = 'terrain';
 	}
 
 	setCell(cell) {
@@ -40,6 +41,7 @@ class Wall extends Being {
 		super(world, cell, def);
 
 		this.walkable = false;
+		this.layer = 'structures';
 
 		this.graphics = Utils.Graphics.rectangle(world.scale, world.scale, 0x000000);
 		
@@ -58,6 +60,7 @@ class Creature extends Being {
 		};
 
 		this.walkable = false;
+		this.layer = 'creatures';
 	}
 
 	takeDamage(amount) {

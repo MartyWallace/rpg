@@ -101,7 +101,7 @@ class Cell {
 		this.highlightGraphics.alpha = 0.5;
 		this.highlightGraphics.position.set(this.x * scale, this.y * scale);
 
-		this.grid.world.graphics.addChild(this.highlightGraphics);
+		this.grid.world.layer('ui').addChild(this.highlightGraphics);
 	}
 
 	stopHighlight() {

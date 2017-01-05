@@ -68,7 +68,7 @@ class Battle extends EventEmitter {
 
 					if (entity.count >= 100) {
 						entity.count = 0;
-						entity.creature.cell.highlight(0xCC4400);
+						//entity.creature.cell.highlight(0xCC4400);
 
 						return entity.creature;
 					}
@@ -124,6 +124,7 @@ class World extends EventEmitter {
 		this.scale = scale;
 		this.beings = new List();
 		this.graphics = new PIXI.Container();
+		this.layers = { };
 		this.viewing = null;
 		this.setState(this.STATE_IDLE);
 		this.party = null;
@@ -131,14 +132,32 @@ class World extends EventEmitter {
 		this.nextBattle = 10;
 		this.battle = null;
 		this.lastHoverCell = null;
+
+		['grid', 'terrain', 'creatures', 'structures', 'ui'].map(name => this.createLayer(name));
+	}
+
+	createLayer(name) {
+		if (!(name in this.layers)) {
+			let layer = new PIXI.Container();
+
+			this.layers[name] = layer;
+			this.graphics.addChild(layer);
+		} else {
+			throw new Error('Layer "' + name + '" already exists.');
+		}
+	}
+
+	layer(name) {
+		if (name in this.layers) {
+			return this.layers[name];
+		} else {
+			throw new Error('Layer "' + name + '" does not exist.');
+		}
 	}
 
 	setupGrid(width, height, scale) {
 		this.grid = new Grid(this, width, height);
-
-		this.graphics.addChild(
-			this.grid.createWatermark(scale)
-		);
+		this.layer('grid').addChild(this.grid.createWatermark(scale));
 	}
 
 	handleClick(cell) {
@@ -261,7 +280,7 @@ class World extends EventEmitter {
 			let being = new beings[def.type](this, cell, def);
 
 			if (being.graphics) {
-				this.graphics.addChild(being.graphics);
+				this.layer(being.layer).addChild(being.graphics);
 			}
 
 			this.beings.add(being);
