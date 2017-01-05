@@ -35,6 +35,8 @@ const game = {
 
 	update() {
 		this.world.update();
+		this.ui.update();
+		
 		renderer.render(stage);
 
 		window.requestAnimationFrame(this.update.bind(this));

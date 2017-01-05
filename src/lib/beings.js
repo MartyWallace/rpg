@@ -8,6 +8,8 @@ class Being extends EventEmitter {
 		this.prevCell = null;
 		this.graphics = null;
 		this.walkable = true;
+
+		this.name = '';
 	}
 
 	setCell(cell) {
@@ -89,6 +91,7 @@ class Hero extends Creature {
 		super(world, cell, def);
 
 		this.wait = 5;
+		this.stats.health = this.stats.maxhealth = 12;
 
 		this.graphics = new PIXI.Graphics();
 		this.graphics.beginFill(def.data.attrs.color);
@@ -123,6 +126,7 @@ class Skeleton extends Enemy {
 		super(world, cell, def);
 
 		this.wait = 6;
+		this.name = 'Skeleton';
 
 		this.graphics = new PIXI.Graphics();
 		this.graphics.beginFill(0x00CC22);

@@ -59,13 +59,15 @@ class Battle extends EventEmitter {
 	}
 
 	next() {
-		while (true) {
-			for (let entity of this.timeline) {
-				entity.count += entity.creature.wait;
+		if (this.timeline.length > 0) {
+			while (true) {
+				for (let entity of this.timeline) {
+					entity.count += entity.creature.wait;
 
-				if (entity.count >= 100) {
-					entity.count = 0;
-					return entity.creature;
+					if (entity.count >= 100) {
+						entity.count = 0;
+						return entity.creature;
+					}
 				}
 			}
 		}
@@ -271,6 +273,9 @@ class World extends EventEmitter {
 
 		// Allow raw JSON strings to be provided.
 		if (typeof level === 'string') level = JSON.parse(level);
+
+		if (!('width') in level) throw new Error('Levels must have a width defined.');
+		if (!('height') in level) throw new Error('Levels must have a height defined.');
 
 		this.level = level;
 		this.setupGrid(level.width, level.height, this.scale);
