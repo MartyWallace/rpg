@@ -292,8 +292,8 @@ class World extends EventEmitter {
 	}
 
 	destroy(being) {
-		if (being.graphics) {
-			being.graphics.parent === this.graphics && this.graphics.removeChild(being.graphics);
+		if (being.graphics && being.graphics.parent) {
+			being.graphics.parent.removeChild(being.graphics);
 		}
 
 		this.beings.remove(being);
