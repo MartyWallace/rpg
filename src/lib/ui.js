@@ -30,14 +30,12 @@ class UI {
 		return new Promise(resolve => {
 			let menu = new PIXI.Container();
 
+			menu.position.set(100, 100);
+
 			options.forEach((option, index) => {
 				let btn = new PIXI.Container();
-				let back = new PIXI.Graphics();
-				let text = new PIXI.Text(option, { fill: 0xFFFFFF });
-
-				back.beginFill(0x0000CC);
-				back.drawRect(0, 0, 160, 30);
-				back.endFill();
+				let back = Utils.Graphics.rectangle(160, 30, 0x0000CC);
+				let text = new PIXI.Text(option, { fill: 0xFFFFFF, fontSize: 14 });
 
 				btn.addChild(back);
 				btn.addChild(text);
@@ -66,14 +64,23 @@ class UI {
 		party.heroes.forEach((hero, index) => {
 			let status = new HeroStatus(hero);
 
-			status.graphics.x = 50 + (index * 150);
-			status.graphics.y = GAME_HEIGHT - 100;
+			status.graphics.x = 50 + (index * 90);
+			status.graphics.y = GAME_HEIGHT - 130;
 
 			this.graphics.addChild(status.graphics);
 
 			this.heroStatuses.push(status);
 			this.elements.push(status);
 		});
+	}
+
+	showDamage(creature, amount) {
+		let display = new PIXI.Text(amount, { fill: 0x000000 });
+		display.position.set(creature.cell.x * game.world.scale, creature.cell.y * game.world.scale);
+
+		game.world.graphics.addChild(display);
+
+		setTimeout(() => display.parent.removeChild(display), 1000);
 	}
 }
 
@@ -96,14 +103,10 @@ class HeroStatus extends UIElement {
 	constructor(hero) {
 		super();
 
-		this.background = new PIXI.Graphics();
-		this.background.beginFill(0x0000FF);
-		this.background.drawRect(0, 0, 140, 60);
-		this.background.endFill();
+		this.background = Utils.Graphics.rectangle(80, 80, 0x0000CC);
+		this.name = new PIXI.Text(hero.def.data.name, { fill: 0xFFFFFF, fontSize: 12 });
 
-		this.name = new PIXI.Text(hero.def.data.name, { fill: 0xFFFFFF });
-
-		this.hp = new PIXI.Text(hero.stats.health + '/' + hero.stats.maxhealth + 'HP', { fill: 0xFFFFFF });
+		this.hp = new PIXI.Text(hero.stats.health + '/' + hero.stats.maxhealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
 		this.hp.y = 30;
 
 		this.graphics.addChild(this.background);

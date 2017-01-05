@@ -41,9 +41,7 @@ class Wall extends Being {
 
 		this.walkable = false;
 
-		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(0x111111);
-		this.graphics.drawRect(0, 0, world.scale, world.scale);
+		this.graphics = Utils.Graphics.rectangle(world.scale, world.scale, 0x000000);
 		
 		this.setCell(cell);
 	}
@@ -63,6 +61,10 @@ class Creature extends Being {
 	}
 
 	takeDamage(amount) {
+		amount = Math.round(amount);
+
+		game.ui.showDamage(this, amount);
+
 		this.stats.health -= amount;
 
 		this.stats.health = Math.max(0, this.stats.health);
@@ -92,11 +94,7 @@ class Hero extends Creature {
 
 		this.wait = 5;
 		this.stats.health = this.stats.maxhealth = 12;
-
-		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(def.data.attrs.color);
-		this.graphics.drawRect(0, 0, world.scale, world.scale);
-		this.graphics.endFill();
+		this.graphics = Utils.Graphics.circle(world.scale / 2, def.data.attrs.color);
 
 		this.setCell(cell);
 	}
@@ -128,10 +126,7 @@ class Skeleton extends Enemy {
 		this.wait = 6;
 		this.name = 'Skeleton';
 
-		this.graphics = new PIXI.Graphics();
-		this.graphics.beginFill(0x00CC22);
-		this.graphics.drawRect(0, 0, world.scale, world.scale);
-		this.graphics.endFill();
+		this.graphics = Utils.Graphics.circle(world.scale / 2, 0x00CC22);
 
 		this.setCell(cell);
 	}
@@ -140,7 +135,7 @@ class Skeleton extends Enemy {
 		return new Promise(resolve => {
 			setTimeout(() => {
 				let hero = battle.randomHero();
-				hero.takeDamage(1);
+				hero.takeDamage(Utils.Random.between(1, 3));
 
 				resolve();
 			}, 1000);

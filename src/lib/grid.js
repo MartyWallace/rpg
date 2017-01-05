@@ -15,6 +15,34 @@ class Grid {
 		}
 	}
 
+	createWatermark(scale) {
+		let watermark = new PIXI.Container();
+		let light = true;
+
+		for (let x = 0; x < this.width; x++ ) {
+			for (let y = 0; y < this.height; y++) {
+				let box = Utils.Graphics.rectangle(scale, scale, light ? 0x666666 : 0x606060);
+				box.position.set(x * scale, y * scale);
+
+				watermark.addChild(box);
+
+				light = !light;
+			}
+
+			if (this.height % 2 === 0) light = !light;
+		}
+
+		return watermark;
+	}
+
+	stopHighlightAll() {
+		for (let x = 0; x < this.width; x++ ) {
+			for (let y = 0; y < this.height; y++) {
+				this.find(x, y).stopHighlight();
+			}
+		}
+	}
+
 	find(x, y, scale = 1) {
 		x = Math.floor(x / scale);
 		y = Math.floor(y / scale);
@@ -58,6 +86,7 @@ class Cell {
 		this.grid = grid;
 		this.x = x;
 		this.y = y;
+		this.highlightGraphics = null;
 	}
 
 	distanceTo(cell) {
@@ -65,6 +94,20 @@ class Cell {
 		let b = cell.y - this.y;
 
 		return Math.sqrt(a * a + b * b);
+	}
+
+	highlight(color, scale) {
+		this.highlightGraphics = Utils.Graphics.rectangle(scale, scale, color);
+		this.highlightGraphics.alpha = 0.5;
+		this.highlightGraphics.position.set(this.x * scale, this.y * scale);
+
+		this.grid.world.graphics.addChild(this.highlightGraphics);
+	}
+
+	stopHighlight() {
+		if (this.highlightGraphics && this.highlightGraphics.parent) {
+			this.highlightGraphics.parent.removeChild(this.highlightGraphics);
+		}
 	}
 
 	get content() {

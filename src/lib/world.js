@@ -59,6 +59,8 @@ class Battle extends EventEmitter {
 	}
 
 	next() {
+		//this.world.grid.stopHighlightAll();
+
 		if (this.timeline.length > 0) {
 			while (true) {
 				for (let entity of this.timeline) {
@@ -66,6 +68,8 @@ class Battle extends EventEmitter {
 
 					if (entity.count >= 100) {
 						entity.count = 0;
+						entity.creature.cell.highlight(0xCC4400);
+
 						return entity.creature;
 					}
 				}
@@ -126,35 +130,22 @@ class World extends EventEmitter {
 		this.level = null;
 		this.nextBattle = 10;
 		this.battle = null;
+		this.lastHoverCell = null;
 	}
 
 	setupGrid(width, height, scale) {
 		this.grid = new Grid(this, width, height);
 
-		let light = true;
-
-		for (let x = 0; x < width; x++ ) {
-			for (let y = 0; y < height; y++) {
-				let box = new PIXI.Graphics();
-
-				box.beginFill(light ? 0x666666 : 0x606060);
-				box.drawRect(0, 0, scale, scale);
-				box.position.set(x * scale, y * scale);
-				box.endFill();
-
-				this.graphics.addChild(box);
-
-				light = !light;
-			}
-
-			if (height % 2 === 0) light = !light;
-		}
+		this.graphics.addChild(
+			this.grid.createWatermark(scale)
+		);
 	}
 
 	handleClick(cell) {
 		if (this.state === this.STATE_IDLE) {
 			if (cell) {
 				if (cell.empty) {
+					this.grid.stopHighlightAll();
 					this.setState(this.STATE_WALKING);
 
 					let path = this.grid.path(this.party.leader.cell, cell).shift();
@@ -188,6 +179,26 @@ class World extends EventEmitter {
 		}
 
 		this.emit('interact', cell);
+	}
+
+	handleHover(cell) {
+		if (this.lastHoverCell) {
+			if (this.lastHoverCell !== cell) {
+				this.grid.stopHighlightAll();
+
+				if (this.state === this.STATE_IDLE) {
+					// Highlight path.
+					let path = this.grid.path(this.party.leader.cell, cell).shift();
+					path.cells.forEach(cell => cell.highlight(0x00FF00, this.scale));
+				} else if (this.state === this.STATE_BATTLE) {
+					cell.highlight(0xFF0000, this.scale);
+				}
+
+				this.emit('hover', cell);
+			}
+		}
+
+		this.lastHoverCell = cell;
 	}
 
 	startBattle() {
@@ -322,6 +333,8 @@ class World extends EventEmitter {
 		if (this.graphics.y > 0) this.graphics.y = 0;
 		if (this.graphics.x + this.graphics.width < GAME_WIDTH) this.graphics.x = GAME_WIDTH - this.graphics.width;
 		if (this.graphics.y + this.graphics.height < GAME_HEIGHT) this.graphics.y = GAME_HEIGHT - this.graphics.height;
+
+		this.emit('cameraMoved', cell);
 	}
 
 	findByType(type) {

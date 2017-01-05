@@ -52,9 +52,6 @@ const game = {
 		);
 
 		if (event.type === 'click') this.world.handleClick(cell);
-
-		if (event.type === 'mousemove') {
-			//
-		}
+		if (event.type === 'mousemove') this.world.handleHover(cell);
 	}
 }
