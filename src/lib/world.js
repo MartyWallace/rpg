@@ -212,6 +212,7 @@ class World extends EventEmitter {
 			this.battle.on('victory', () => {
 				console.log('victory');
 
+				this.view(this.party.leader.cell);
 				this.battle = null;
 
 				setTimeout(() => this.setState(this.STATE_IDLE), 100);
