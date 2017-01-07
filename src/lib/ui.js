@@ -6,7 +6,7 @@ class UI {
 		this.creatureStatus = null;
 
 		game.world.on('load', () => {
-			this.showHeroStatuses(game.world.party);
+			//this.showHeroStatuses(game.world.party);
 		});
 
 		game.world.on('unload', () => {
@@ -67,7 +67,7 @@ class UI {
 			let status = new HeroStatus(hero);
 
 			status.graphics.x = 50 + (index * 90);
-			status.graphics.y = GAME_HEIGHT - 130;
+			status.graphics.y = GAME_HEIGHT - 230;
 
 			this.graphics.addChild(status.graphics);
 

@@ -14,18 +14,20 @@ class Party extends EventEmitter {
 		});
 
 		game.world.findByType(InteractiveBeing).forEach(being => {
-			if (being._interacting) {
-				being.stopInteraction();
-				being._interacting = false;
-			}
-			
-			if (this.leader.cell.isAdjacent(being.cell)) {
-				if (!being._interacting) {
-					being.startInteraction();
-					being._interacting = true;
+			if (being.interacting) {
+				being.leave();
+				being.interacting = false;
+			} else {
+				if (this.leader.cell.isAdjacent(being.cell)) {
+					being.approach();
+					being.interacting = true;
 				}
 			}
 		});
+	}
+
+	save() {
+		return this.heroes.map(hero => hero.save());
 	}
 
 	randomHero() {
@@ -128,7 +130,7 @@ class Battle extends EventEmitter {
 }
 
 class World extends EventEmitter {
-	constructor(width, height, scale = 40) {
+	constructor(scale = 40) {
 		super();
 
 		this.STATE_IDLE = 'idle';
@@ -143,7 +145,7 @@ class World extends EventEmitter {
 		this.setState(this.STATE_IDLE);
 		this.party = null;
 		this.map = null;
-		this.nextBattle = 10;
+		this.nextBattle = 30;
 		this.battle = null;
 		this.lastHoverCell = null;
 
@@ -225,6 +227,10 @@ class World extends EventEmitter {
 						if (battle) this.startBattle();
 						else this.setState(this.STATE_IDLE);
 					});
+				} else {
+					if (cell.content instanceof InteractiveBeing && cell.content.interacting) {
+						cell.content.click();
+					}
 				}
 			}
 
@@ -380,13 +386,19 @@ class World extends EventEmitter {
 		});
 
 		this.party = new Party(heroes);
+		this.party.setCell(this.party.leader.cell);
 		this.view(this.party.leader.cell);
 
 		this.emit('load');
 	}
 
 	unload() {
-		this.beings.items.forEach(being => this.destroy(being));
+		while (this.beings.items.length > 0) {
+			this.destroy(this.beings.items.pop());
+		}
+
+		this.layer('grid').removeChildren();
+		
 		this.emit('unload');
 	}
 

@@ -40,16 +40,12 @@ class InteractiveBeing extends Being {
 	constructor(world, cell, def) {
 		super(world, cell, def);
 
-		this._interacting = false;
+		this.interacting = false;
 	}
 
-	startInteraction() {
-		console.log('start');
-	}
-
-	stopInteraction() {
-		console.log('stop');
-	}
+	approach() { }
+	leave() { }
+	click() { }
 }
 
 class Wall extends Being {
@@ -73,8 +69,23 @@ class Door extends InteractiveBeing {
 		this.layer = 'structures';
 
 		this.graphics = Utils.Graphics.rectangle(world.scale, world.scale, 0xFF0000);
+		this.graphics.interactive = true;
+		this.graphics.buttonMode = true;
 
 		this.setCell(cell);
+	}
+
+	click() {
+		let target = this.def.destination.level;
+
+		if (target >= 0 && target < LEVELS.length) {
+			game.world.unload();
+			game.world.load(LEVELS[this.def.destination.level], {
+				x: this.def.destination.x, y: this.def.destination.y, heroes: game.world.party.save()
+			});
+		} else {
+			throw new Error(`Level ${target} does not exist.`);
+		}
 	}
 }
 
@@ -160,7 +171,7 @@ class Hero extends Creature {
 	}
 
 	save() {
-		return null;
+		return this.def.data;
 	}
 }
 

@@ -11,13 +11,13 @@ const game = {
 	ui: null,
 
 	init() {
-		this.world = new World(20, 24, DRAW_SCALE);
+		this.world = new World(DRAW_SCALE);
 		this.ui = new UI();
 
 		stage.addChild(this.world.graphics);
 		stage.addChild(this.ui.graphics);
 		
-		this.world.load(LEVELS[0], {
+		this.world.load(LEVELS[1], {
 			x: 1, y: 3,
 			heroes: [
 				{ name: 'marty', type: 'warrior', attrs: { color: 0xFFFFFF } },
