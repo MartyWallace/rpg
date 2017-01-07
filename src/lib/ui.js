@@ -43,6 +43,7 @@ class UI {
 				btn.y = index * 30;
 
 				btn.interactive = true;
+				btn.buttonMode = true;
 
 				btn.on('click', event => {
 					resolve(option);

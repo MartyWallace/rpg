@@ -105,8 +105,20 @@ class Hero extends Creature {
 	action(battle) {
 		return new Promise(resolve => {
 			game.ui.showHeroActions(this, battle).then(selection => {
-				if (selection === 'Attack') battle.randomEnemy().takeDamage(1);
-				resolve();
+				if (selection === 'Attack') {
+					let interaction = cell => {
+						if (cell.content instanceof Creature) {
+							cell.content.takeDamage(Utils.Random.between(1, 3));
+
+							game.world.off('interact', interaction);
+							resolve();
+						} else {
+							console.warn('Please select a creature for this action.');
+						}
+					};
+
+					game.world.on('interact', interaction);
+				}
 			});
 		});
 	}

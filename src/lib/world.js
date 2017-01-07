@@ -133,6 +133,12 @@ class World extends EventEmitter {
 		this.battle = null;
 		this.lastHoverCell = null;
 
+		this.graphics.interactive = true;
+		this.graphics.interactiveChildren = true;
+
+		this.graphics.on('click', event => this.handleClick(this.convertMouseEventToCell(event)));
+		this.graphics.on('mousemove', event => this.handleHover(this.convertMouseEventToCell(event)));
+
 		['grid', 'terrain', 'creatures', 'structures', 'ui'].map(name => this.createLayer(name));
 	}
 
@@ -158,6 +164,17 @@ class World extends EventEmitter {
 	setupGrid(width, height, scale) {
 		this.grid = new Grid(this, width, height);
 		this.layer('grid').addChild(this.grid.createWatermark(scale));
+	}
+
+	convertMouseEventToCell(event) {
+		// TODO: Potentially need to offset by canvas position.
+		// ...
+
+		return this.grid.find(
+			event.data.global.x - this.graphics.x,
+			event.data.global.y - this.graphics.y,
+			DRAW_SCALE
+		);
 	}
 
 	handleClick(cell) {
@@ -189,9 +206,11 @@ class World extends EventEmitter {
 					});
 				}
 			}
+
 		} else if (this.state === this.STATE_WALKING) {
 			// Shouldn't do anything while walking - unless maybe it stops the current walk?
 			// ...
+
 		} else if (this.state === this.STATE_BATTLE) {
 			// Might want some special actions if in the battle state.
 			// ...
@@ -245,7 +264,7 @@ class World extends EventEmitter {
 				this.view(this.party.leader.cell);
 				this.battle = null;
 
-				setTimeout(() => this.setState(this.STATE_IDLE), 100);
+				this.setState(this.STATE_IDLE);
 			});
 
 			this.emit('startBattle', this.battle);
