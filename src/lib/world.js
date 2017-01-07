@@ -12,6 +12,20 @@ class Party extends EventEmitter {
 			hero.setCell(last);
 			last = hero.prevCell;
 		});
+
+		game.world.findByType(InteractiveBeing).forEach(being => {
+			if (being._interacting) {
+				being.stopInteraction();
+				being._interacting = false;
+			}
+			
+			if (this.leader.cell.isAdjacent(being.cell)) {
+				if (!being._interacting) {
+					being.startInteraction();
+					being._interacting = true;
+				}
+			}
+		});
 	}
 
 	randomHero() {
@@ -128,7 +142,7 @@ class World extends EventEmitter {
 		this.viewing = null;
 		this.setState(this.STATE_IDLE);
 		this.party = null;
-		this.level = null;
+		this.map = null;
 		this.nextBattle = 10;
 		this.battle = null;
 		this.lastHoverCell = null;
@@ -136,8 +150,15 @@ class World extends EventEmitter {
 		this.graphics.interactive = true;
 		this.graphics.interactiveChildren = true;
 
-		this.graphics.on('click', event => this.handleClick(this.convertMouseEventToCell(event)));
-		this.graphics.on('mousemove', event => this.handleHover(this.convertMouseEventToCell(event)));
+		this.graphics.on('click', event => {
+			let cell = this.convertMouseEventToCell(event);
+			cell && this.handleClick(cell);
+		});
+
+		this.graphics.on('mousemove', event => {
+			let cell = this.convertMouseEventToCell(event);
+			cell && this.handleHover(cell);
+		});
 
 		['grid', 'terrain', 'creatures', 'structures', 'ui'].map(name => this.createLayer(name));
 	}
@@ -246,7 +267,7 @@ class World extends EventEmitter {
 	}
 
 	startBattle() {
-		if ('enemies' in this.level && this.level.enemies.length > 0) {
+		if ('enemies' in this.map && this.map.enemies.length > 0) {
 			this.nextBattle = 20 + Math.round(Math.random() * 20);
 			this.setState(this.STATE_BATTLE);
 
@@ -254,7 +275,7 @@ class World extends EventEmitter {
 			let amount = Math.round(Utils.Random.between(2, 4));
 
 			while (enemies.length < amount) {
-				let def = Utils.Random.fromArray(this.level.enemies);
+				let def = Utils.Random.fromArray(this.map.enemies);
 				let cell = this.grid.cluster(this.party.leader.cell, 4).filter(cell => cell.empty).randomCell();
 				let enemy = this.create({ type: def.type, x: cell.x, y: cell.y });
 
@@ -324,6 +345,18 @@ class World extends EventEmitter {
 		this.beings.remove(being);
 	}
 
+	setupBoundaries(width, height, doors) {
+		for (let x = 0; x < width; x++) {
+			for (let y = 0; y < height; y++) {
+				if ((x === 0 || y === 0 || x === width - 1 || y === height - 1) && !this.map.hasDoorAt(x, y)) {
+					this.create({ type: 'Wall', x, y });
+				}
+			}
+		}
+
+		doors.forEach(door => this.create({ type: 'Door', x: door.x, y: door.y, destination: door.destination }));
+	}
+
 	load(level, party) {
 		this.unload();
 
@@ -333,8 +366,10 @@ class World extends EventEmitter {
 		if (!('width') in level) throw new Error('Levels must have a width defined.');
 		if (!('height') in level) throw new Error('Levels must have a height defined.');
 
-		this.level = level;
+		this.map = new Map(level);
+
 		this.setupGrid(level.width, level.height, this.scale);
+		this.setupBoundaries(level.width, level.height, level.doors);
 
 		level.beings.forEach(def => this.create(def));
 
@@ -388,5 +423,23 @@ class World extends EventEmitter {
 	setState(state) {
 		this.state = state;
 		this.emit('state', state);
+	}
+}
+
+class Map {
+	constructor(data) {
+		this.data = data;
+	}
+
+	hasDoorAt(x, y) {
+		for (let door of this.data.doors) {
+			if (door.x === x && door.y === y) return true;
+		}
+
+		return false;
+	}
+
+	get enemies() {
+		return this.data.enemies;
 	}
 }

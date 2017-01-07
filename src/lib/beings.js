@@ -36,6 +36,22 @@ class Being extends EventEmitter {
 	}
 }
 
+class InteractiveBeing extends Being {
+	constructor(world, cell, def) {
+		super(world, cell, def);
+
+		this._interacting = false;
+	}
+
+	startInteraction() {
+		console.log('start');
+	}
+
+	stopInteraction() {
+		console.log('stop');
+	}
+}
+
 class Wall extends Being {
 	constructor(world, cell, def) {
 		super(world, cell, def);
@@ -45,6 +61,19 @@ class Wall extends Being {
 
 		this.graphics = Utils.Graphics.rectangle(world.scale, world.scale, 0x000000);
 		
+		this.setCell(cell);
+	}
+}
+
+class Door extends InteractiveBeing {
+	constructor(world, cell, def) {
+		super(world, cell, def);
+
+		this.walkable = false;
+		this.layer = 'structures';
+
+		this.graphics = Utils.Graphics.rectangle(world.scale, world.scale, 0xFF0000);
+
 		this.setCell(cell);
 	}
 }
@@ -166,5 +195,5 @@ class Skeleton extends Enemy {
 }
 
 const beings = {
-	Wall, Hero, Skeleton
+	Wall, Door, Hero, Skeleton
 };

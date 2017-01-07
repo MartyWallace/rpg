@@ -89,11 +89,23 @@ class Cell {
 		this.highlightGraphics = null;
 	}
 
+	equals(cell) {
+		return this.x === cell.x && this.y === cell.y;
+	}
+
 	distanceTo(cell) {
 		let a = cell.x - this.x;
 		let b = cell.y - this.y;
 
 		return Math.sqrt(a * a + b * b);
+	}
+
+	isAdjacent(cell) {
+		for (let a of this.adjacent) {
+			if (cell.equals(a)) return true;
+		}
+
+		return false;
 	}
 
 	highlight(color, scale) {
@@ -122,6 +134,22 @@ class Cell {
 
 	get empty() {
 		return this.content === null;
+	}
+
+	get north() { return this.grid.find(this.x, this.y - 1); }
+	get south() { return this.grid.find(this.x, this.y + 1); }
+	get east() { return this.grid.find(this.x + 1, this.y); }
+	get west() { return this.grid.find(this.x - 1, this.y); }
+
+	get adjacent() {
+		let result = [];
+
+		this.north && result.push(this.north);
+		this.east && result.push(this.east);
+		this.south && result.push(this.south);
+		this.west && result.push(this.west);
+
+		return result;
 	}
 }
 

@@ -17,5 +17,8 @@ const LEVELS = [{
 	],
 	enemies: [
 		{ type: 'Skeleton', level: [1, 2] }
+	],
+	doors: [
+		{ destination: 0, x: 4, y: 0 }
 	]
 }];
