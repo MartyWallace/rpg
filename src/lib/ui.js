@@ -3,6 +3,7 @@ class UI {
 		this.graphics = new PIXI.Container();
 		this.elements = [];
 		this.heroStatuses = [];
+		this.creatureStatus = null;
 
 		game.world.on('load', () => {
 			this.showHeroStatuses(game.world.party);
@@ -83,6 +84,21 @@ class UI {
 
 		setTimeout(() => display.parent.removeChild(display), 1000);
 	}
+
+	showCreatureStatus(creature) {
+		this.hideCreatureStatus();
+
+		this.creatureStatus = new CreatureStatus(creature);
+		this.creatureStatus.graphics.position.set(creature.cell.x * DRAW_SCALE, (creature.cell.y + 1) * DRAW_SCALE);
+		
+		this.elements.push(this.creatureStatus);
+
+		game.world.layer('ui').addChild(this.creatureStatus.graphics);
+	}
+
+	hideCreatureStatus() {
+		if (this.creatureStatus) this.creatureStatus.destroy();
+	}
 }
 
 class UIElement {
@@ -119,5 +135,26 @@ class HeroStatus extends UIElement {
 
 	update() {
 		this.hp.text = this.hero.stats.health + '/' + this.hero.stats.maxhealth + 'HP';
+	}
+}
+
+class CreatureStatus extends UIElement {
+	constructor(creature) {
+		super();
+
+		this.creature = creature;
+
+		this.background = Utils.Graphics.rectangle(120, 90, 0x0000CC);
+		this.name = new PIXI.Text(creature.name, { fill: 0xFFFFFF, fontSize: 12 });
+		this.hp = new PIXI.Text(creature.stats.health + '/' + creature.stats.maxhealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
+		this.hp.y = 30;
+
+		this.graphics.addChild(this.background);
+		this.graphics.addChild(this.name);
+		this.graphics.addChild(this.hp);
+	}
+
+	update() {
+		this.hp.text = this.creature.stats.health + '/' + this.creature.stats.maxhealth + 'HP';
 	}
 }

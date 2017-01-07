@@ -53,9 +53,11 @@ class Creature extends Being {
 	constructor(world, cell, def) {
 		super(world, cell, def);
 
+		let hp = Math.round(Utils.Random.between(4, 6));
+
 		this.stats = {
-			health: 1,
-			maxhealth: 1,
+			health: hp,
+			maxhealth: hp,
 			wait: 1
 		};
 
@@ -99,6 +101,8 @@ class Hero extends Creature {
 		this.stats.health = this.stats.maxhealth = 12;
 		this.graphics = Utils.Graphics.circle(world.scale / 2, def.data.attrs.color);
 
+		this.name = def.data.name;
+
 		this.setCell(cell);
 	}
 
@@ -113,11 +117,14 @@ class Hero extends Creature {
 							game.world.off('interact', interaction);
 							resolve();
 						} else {
-							console.warn('Please select a creature for this action.');
+							// Must select a creature.
+							// ...
 						}
 					};
 
 					game.world.on('interact', interaction);
+				} else {
+					resolve();
 				}
 			});
 		});

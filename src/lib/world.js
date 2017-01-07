@@ -223,6 +223,12 @@ class World extends EventEmitter {
 		if (this.lastHoverCell) {
 			if (this.lastHoverCell !== cell) {
 				this.grid.stopHighlightAll();
+				game.ui.hideCreatureStatus();
+
+				// Show creature status if hovering.
+				if (cell.content instanceof Creature) {
+					game.ui.showCreatureStatus(cell.content);
+				}
 
 				if (this.state === this.STATE_IDLE) {
 					// Highlight path.
