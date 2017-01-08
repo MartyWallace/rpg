@@ -4,6 +4,7 @@
   "dependencies": {
     "pixi.js": "^4.3.0",
     "eventEmitter": "^5.1.0",
-    "pathfinding": "^0.4.18"
+    "pathfinding": "^0.4.18",
+    "TweenJS": "^0.6.2"
   }
 }

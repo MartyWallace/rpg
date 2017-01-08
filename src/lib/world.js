@@ -5,24 +5,20 @@ class Party extends EventEmitter {
 		this.heroes = heroes;
 	}
 
-	setCell(cell) {
-		let last = cell;
+	moveToCell(cell, duration = 0) {
+		return new Promise((resolve, reject) => {
+			let last = cell;
+			let moves = [];
 
-		this.heroes.forEach(hero => {
-			hero.setCell(last);
-			last = hero.prevCell;
-		});
-
-		game.world.findByType(InteractiveBeing).forEach(being => {
-			if (being.interacting) {
-				being.leave();
-				being.interacting = false;
-			} else {
-				if (this.leader.cell.isAdjacent(being.cell)) {
-					being.approach();
-					being.interacting = true;
-				}
-			}
+			this.heroes.forEach(hero => {
+				moves.push(hero.moveToCell(last, duration));
+				last = hero.prevCell;
+			});
+			
+			Promise.all(moves).then(cells => {
+				game.world.alertInteractiveBeings(cell);
+				resolve(cell);
+			});
 		});
 	}
 
@@ -211,16 +207,13 @@ class World extends EventEmitter {
 
 					path.follow(cell => {
 						return new Promise((resolve, reject) => {
-							this.party.setCell(cell);
-							this.view(cell);
+							this.view(cell, 200);
+							this.party.moveToCell(cell, 200).then(cell => {
+								this.nextBattle -= 1;
 
-							this.nextBattle -= 1;
-
-							if (this.nextBattle <= 0) {
-								reject(true);
-							} else {
-								setTimeout(resolve.bind(), 80);
-							}
+								if (this.nextBattle <= 0) reject(true);
+								else resolve();
+							});
 						});
 
 					}).then(battle => {
@@ -270,6 +263,20 @@ class World extends EventEmitter {
 		}
 
 		this.lastHoverCell = cell;
+	}
+
+	alertInteractiveBeings(cell) {
+		this.findByType(InteractiveBeing).forEach(being => {
+			if (being.interacting) {
+				being.leave();
+				being.interacting = false;
+			} else {
+				if (this.party.leader.cell.isAdjacent(being.cell)) {
+					being.approach();
+					being.interacting = true;
+				}
+			}
+		});
 	}
 
 	startBattle() {
@@ -386,9 +393,9 @@ class World extends EventEmitter {
 		});
 
 		this.party = new Party(heroes);
-		this.party.setCell(this.party.leader.cell);
-		this.view(this.party.leader.cell);
+		this.alertInteractiveBeings(this.party.leader.cell);
 
+		this.view(this.party.leader.cell);
 		this.emit('load');
 	}
 
@@ -414,18 +421,20 @@ class World extends EventEmitter {
 		this.beings.items.forEach(being => being.update());
 	}
 
-	view(cell) {
-		this.viewing = cell;
+	view(cell, duration = 0) {
+		return new Promise((resolve, reject) => {
+			let targetX = -cell.x * this.scale + (game.width / 2) - (this.scale / 2);
+			let targetY = -cell.y * this.scale + (game.height / 2) - (this.scale / 2);
 
-		this.graphics.x = -cell.x * this.scale + (GAME_WIDTH / 2) - (this.scale / 2);
-		this.graphics.y = -cell.y * this.scale + (GAME_HEIGHT / 2) - (this.scale / 2);
+			// TODO: Should use grid width and height, not graphics.
+			targetX = Utils.Math.clamp(targetX, game.width - this.graphics.width, 0);
+			targetY = Utils.Math.clamp(targetY, game.height - this.graphics.height, 0);
 
-		if (this.graphics.x > 0) this.graphics.x = 0;
-		if (this.graphics.y > 0) this.graphics.y = 0;
-		if (this.graphics.x + this.graphics.width < GAME_WIDTH) this.graphics.x = GAME_WIDTH - this.graphics.width;
-		if (this.graphics.y + this.graphics.height < GAME_HEIGHT) this.graphics.y = GAME_HEIGHT - this.graphics.height;
-
-		this.emit('cameraMoved', cell);
+			createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration).call(() => {
+				this.viewing = cell;
+				resolve(cell);
+			});
+		});
 	}
 
 	findByType(type) {

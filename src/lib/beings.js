@@ -23,6 +23,28 @@ class Being extends EventEmitter {
 		this.cell = cell;
 	}
 
+	/**
+	 * Move this Being to another cell, optionally animating its graphics with TweenJS.
+	 * 
+	 * @param {Cell} cell The target Cell.
+	 * @param {Number} duration The amount of time the animation should take.
+	 * 
+	 * @return {Promise}
+	 */
+	moveToCell(cell, duration = 0) {
+		return new Promise((resolve, reject) => {
+			if (this.graphics) {
+				createjs.Tween.get(this.graphics).to({
+					x: cell.x * game.world.scale,
+					y: cell.y * game.world.scale
+				}, duration).call(() => resolve(cell));
+			}
+
+			this.prevCell = this.cell;
+			this.cell = cell;
+		});
+	}
+
 	update() {
 		//
 	}

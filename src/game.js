@@ -6,9 +6,11 @@ const renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT, {
 	backgroundColor: 0xAAAAAA
 });
 
-const game = {
-	world: null,
-	ui: null,
+class Game {
+	constructor() {
+		this.world = null;
+		this.ui = null;
+	}
 
 	init() {
 		this.world = new World(DRAW_SCALE);
@@ -27,7 +29,7 @@ const game = {
 		});
 
 		this.update();
-	},
+	}
 
 	update() {
 		this.world.update();
@@ -37,4 +39,9 @@ const game = {
 
 		window.requestAnimationFrame(this.update.bind(this));
 	}
+
+	get width() { return GAME_WIDTH; }
+	get height() { return GAME_HEIGHT; }
 }
+
+const game = new Game();
