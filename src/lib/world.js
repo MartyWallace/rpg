@@ -11,7 +11,7 @@ class Party extends EventEmitter {
 			let moves = [];
 
 			this.heroes.forEach(hero => {
-				moves.push(hero.moveToCell(last, duration));
+				moves.push(hero.moveToCell(last, duration, 'linear'));
 				last = hero.prevCell;
 			});
 			
@@ -32,96 +32,6 @@ class Party extends EventEmitter {
 
 	get leader() {
 		return this.heroes.length > 0 ? this.heroes[0] : null;
-	}
-}
-
-class Battle extends EventEmitter {
-	constructor(world, heroes, enemies) {
-		super();
-
-		this.world = world;
-		this.heroes = heroes;
-		this.enemies = enemies;
-		this.creatures = heroes.concat(enemies);
-
-		this.timeline = this.creatures.map(creature => {
-			return { creature, count: 0 };
-		});
-
-		this.enemies.forEach(enemy => {
-			enemy.on('die', () => this.removeEnemy(enemy));
-		});
-	}
-
-	removeEnemy(enemy) {
-		game.world.destroy(enemy);
-
-		this.enemies.splice(this.enemies.indexOf(enemy), 1);
-		this.creatures.splice(this.creatures.indexOf(enemy), 1);
-
-		for (let i = 0; i < this.timeline.length; i++) {
-			if (this.timeline[i].creature === enemy) {
-				this.timeline.splice(i, 1);
-			}
-		}
-	}
-
-	start() {
-		this.action();
-	}
-
-	next() {
-		//this.world.grid.stopHighlightAll();
-
-		if (this.timeline.length > 0) {
-			while (true) {
-				for (let entity of this.timeline) {
-					entity.count += entity.creature.wait;
-
-					if (entity.count >= 100) {
-						entity.count = 0;
-						//entity.creature.cell.highlight(0xCC4400);
-
-						return entity.creature;
-					}
-				}
-			}
-		}
-
-		return null;
-	}
-
-	action() {
-		if (this.enemies.length === 0) this.victory();
-		else if (this.heroes.length === 0) this.defeat();
-		else {
-			let next = this.next();
-
-			if (next) {
-				this.world.view(next.cell, 300).then(cell => {
-					next.action(this).then(r => this.action())
-				});
-			} else {
-				// This should never happen.
-				console.warn('Somehow ended up in a stuck battle.');
-			}
-		}
-	}
-
-	victory() {
-		this.emit('victory');
-	}
-
-	defeat() {
-		this.emit('defeat');
-	}
-
-	randomEnemy() {
-		return Utils.Random.fromArray(this.enemies);
-	}
-
-	randomHero() {
-		return Utils.Random.fromArray(this.heroes);
 	}
 }
 
@@ -336,7 +246,7 @@ class World extends EventEmitter {
 		let cell = this.grid.find(def.x, def.y);
 
 		if (cell) {
-			let being = new beings[def.type](this, cell, def);
+			let being = new beings[def.type](cell, def);
 
 			if (being.graphics) {
 				this.layer(being.layer).addChild(being.graphics);
@@ -426,9 +336,10 @@ class World extends EventEmitter {
 	 * 
 	 * @param {Cell} cell The cell to look at.
 	 * @param {Number} duration The time to spend tweening the camera to the target cell.
+	 * @param {String} ease The ease function to use when moving the camera.
 	 * @param {Boolean} clamp Whether the camera view should be clamped within the world or not.
 	 */
-	view(cell, duration = 0, clamp = false) {
+	view(cell, duration = 0, ease = 'sineInOut', clamp = false) {
 		return new Promise((resolve, reject) => {
 			if (this.viewing === cell) {
 				// If we're already looking at the target cell, resolve immediately.
@@ -442,7 +353,7 @@ class World extends EventEmitter {
 					targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
 				}
 
-				createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration, createjs.Ease.sineInOut).call(() => {
+				createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration, createjs.Ease[ease]).call(() => {
 					this.viewing = cell;
 					resolve(cell);
 				});

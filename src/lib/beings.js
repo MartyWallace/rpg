@@ -5,10 +5,9 @@ class Damage {
 }
 
 class Being extends EventEmitter {
-	constructor(world, cell, def) {
+	constructor(cell, def) {
 		super();
 
-		this.world = world;
 		this.cell = cell;
 		this.def = def;
 		this.prevCell = null;
@@ -21,8 +20,8 @@ class Being extends EventEmitter {
 
 	setCell(cell) {
 		if (this.graphics) {
-			this.graphics.x = cell.x * this.world.scale;
-			this.graphics.y = cell.y * this.world.scale;
+			this.graphics.x = cell.x * game.world.scale;
+			this.graphics.y = cell.y * game.world.scale;
 		}
 
 		this.prevCell = this.cell;
@@ -65,8 +64,8 @@ class Being extends EventEmitter {
 }
 
 class InteractiveBeing extends Being {
-	constructor(world, cell, def) {
-		super(world, cell, def);
+	constructor(cell, def) {
+		super(cell, def);
 
 		this.interacting = false;
 	}
@@ -77,26 +76,26 @@ class InteractiveBeing extends Being {
 }
 
 class Wall extends Being {
-	constructor(world, cell, def) {
-		super(world, cell, def);
+	constructor(cell, def) {
+		super(cell, def);
 
 		this.walkable = false;
 		this.layer = 'structures';
 
-		this.graphics = Utils.Graphics.rectangle(world.scale, world.scale, 0x000000);
+		this.graphics = Utils.Graphics.rectangle(game.world.scale, game.world.scale, 0x000000);
 		
 		this.setCell(cell);
 	}
 }
 
 class Door extends InteractiveBeing {
-	constructor(world, cell, def) {
-		super(world, cell, def);
+	constructor(cell, def) {
+		super(cell, def);
 
 		this.walkable = false;
 		this.layer = 'structures';
 
-		this.graphics = Utils.Graphics.rectangle(world.scale, world.scale, 0xFF0000);
+		this.graphics = Utils.Graphics.rectangle(game.world.scale, game.world.scale, 0xFF0000);
 		this.graphics.interactive = true;
 		this.graphics.buttonMode = true;
 
@@ -118,8 +117,8 @@ class Door extends InteractiveBeing {
 }
 
 class Creature extends Being {
-	constructor(world, cell, def) {
-		super(world, cell, def);
+	constructor(cell, def) {
+		super(cell, def);
 
 		let hp = Math.round(Utils.Random.between(4, 6));
 
@@ -161,13 +160,13 @@ class Creature extends Being {
 }
 
 class Hero extends Creature {
-	constructor(world, cell, def) {
-		super(world, cell, def);
+	constructor(cell, def) {
+		super(cell, def);
 
 		this.wait = 5;
 		this.stats.health = this.stats.maxhealth = 12;
-		this.graphics = Utils.Graphics.circle(world.scale / 2, def.data.attrs.color);
 
+		this.graphics = new PIXI.Sprite(game.textures.hero1);
 		this.name = def.data.name;
 
 		this.setCell(cell);
@@ -178,18 +177,16 @@ class Hero extends Creature {
 			game.ui.showHeroActions(this, battle).then(selection => {
 				if (selection === 'Attack' || selection === 'Potion') {
 					let interaction = cell => {
+						game.world.off('interact', interaction);
+
 						if (cell.content instanceof Creature) {
-							game.world.view(cell, 300).then(cell => {
-								setTimeout(() => {
-									let damage = new Damage(
-										selection === 'Attack' ? Utils.Random.between(1, 3) : Utils.Random.between(-3, -1)
-									);
+							let target = cell.content;
 
-									cell.content.takeDamage(damage);
+							createjs.Tween.get(this.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+								let damage = new Damage(selection === 'Attack' ? Utils.Random.between(1, 3) : Utils.Random.between(-15, -12));
 
-									game.world.off('interact', interaction);
-									resolve();
-								}, 500);
+								target.takeDamage(damage);
+								createjs.Tween.get(this.graphics).to({ x: this.cell.x * game.world.scale, y: this.cell.y * game.world.scale }, 200).call(() => resolve());
 							});
 						} else {
 							// Must select a creature, do nothing for now. Will have skills where you
@@ -212,19 +209,19 @@ class Hero extends Creature {
 }
 
 class Enemy extends Creature {
-	constructor(world, cell, def) {
-		super(world, cell, def);
+	constructor(cell, def) {
+		super(cell, def);
 	}
 }
 
 class Skeleton extends Enemy {
-	constructor(world, cell, def) {
-		super(world, cell, def);
+	constructor(cell, def) {
+		super(cell, def);
 
 		this.wait = 6;
 		this.name = 'Skeleton';
 
-		this.graphics = Utils.Graphics.circle(world.scale / 2, 0x338811);
+		this.graphics = new PIXI.Sprite(game.textures.skeleton);
 
 		this.setCell(cell);
 	}
@@ -233,12 +230,12 @@ class Skeleton extends Enemy {
 		return new Promise(resolve => {
 			let target = battle.randomHero();
 
-			game.world.view(target.cell, 300).then(cell => {
-				setTimeout(() => {
+			setTimeout(() => {
+				createjs.Tween.get(this.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
 					target.takeDamage(new Damage(Utils.Random.between(1, 2)));
-					resolve();
-				}, 500);
-			});
+					createjs.Tween.get(this.graphics).to({ x: this.cell.x * game.world.scale, y: this.cell.y * game.world.scale }, 200).call(() => resolve());
+				});
+			}, 500);
 		});
 	}
 }
