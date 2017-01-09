@@ -96,14 +96,13 @@ class World extends EventEmitter {
 	}
 
 	convertMouseEventToCell(event) {
-		// TODO: Potentially need to offset by canvas position.
-		// ...
-
-		return this.grid.find(
-			event.data.global.x - this.graphics.x,
-			event.data.global.y - this.graphics.y,
-			DRAW_SCALE
-		);
+		if (this.grid) {
+			return this.grid.find(
+				event.data.global.x - this.graphics.x,
+				event.data.global.y - this.graphics.y,
+				DRAW_SCALE
+			);
+		}
 	}
 
 	handleClick(cell) {
@@ -281,32 +280,34 @@ class World extends EventEmitter {
 	}
 
 	load(level, party) {
-		this.unload();
+		game.ui.transition(200).then(() => {
+			this.unload();
 
-		// Allow raw JSON strings to be provided.
-		if (typeof level === 'string') level = JSON.parse(level);
+			// Allow raw JSON strings to be provided.
+			if (typeof level === 'string') level = JSON.parse(level);
 
-		if (!('width') in level) throw new Error('Levels must have a width defined.');
-		if (!('height') in level) throw new Error('Levels must have a height defined.');
+			if (!('width') in level) throw new Error('Levels must have a width defined.');
+			if (!('height') in level) throw new Error('Levels must have a height defined.');
 
-		this.map = new Map(level);
+			this.map = new Map(level);
 
-		this.setupGrid(level.width, level.height, this.scale);
-		this.setupBoundaries(level.width, level.height, level.doors);
+			this.setupGrid(level.width, level.height, this.scale);
+			this.setupBoundaries(level.width, level.height, level.doors);
 
-		level.beings.forEach(def => this.create(def));
+			level.beings.forEach(def => this.create(def));
 
-		let heroes = [];
+			let heroes = [];
 
-		party.heroes.forEach(data => {
-			heroes.push(this.create({ type: 'Hero', x: party.x, y: party.y, data }));
+			party.heroes.forEach(data => {
+				heroes.push(this.create({ type: 'Hero', x: party.x, y: party.y, data }));
+			});
+
+			this.party = new Party(heroes);
+			this.alertInteractiveBeings(this.party.leader.cell);
+
+			this.view(this.party.leader.cell);
+			this.emit('load');
 		});
-
-		this.party = new Party(heroes);
-		this.alertInteractiveBeings(this.party.leader.cell);
-
-		this.view(this.party.leader.cell);
-		this.emit('load');
 	}
 
 	unload() {
@@ -339,7 +340,7 @@ class World extends EventEmitter {
 	 * @param {String} ease The ease function to use when moving the camera.
 	 * @param {Boolean} clamp Whether the camera view should be clamped within the world or not.
 	 */
-	view(cell, duration = 0, ease = 'sineInOut', clamp = true) {
+	view(cell, duration = 0, ease = 'sineInOut', clamp = false) {
 		return new Promise((resolve, reject) => {
 			if (this.viewing === cell) {
 				// If we're already looking at the target cell, resolve immediately.

@@ -6,7 +6,7 @@ class UI {
 		this.creatureStatus = null;
 
 		game.world.on('load', () => {
-			//this.showHeroStatuses(game.world.party);
+			this.showHeroStatuses(game.world.party);
 		});
 
 		game.world.on('unload', () => {
@@ -66,8 +66,8 @@ class UI {
 		party.heroes.forEach((hero, index) => {
 			let status = new HeroStatus(hero);
 
-			status.graphics.x = 50 + (index * 90);
-			status.graphics.y = GAME_HEIGHT - 230;
+			status.graphics.x = 20 + (index * 130);
+			status.graphics.y = GAME_HEIGHT - 90;
 
 			this.graphics.addChild(status.graphics);
 
@@ -99,6 +99,20 @@ class UI {
 	hideCreatureStatus() {
 		if (this.creatureStatus) this.creatureStatus.destroy();
 	}
+
+	transition(duration) {
+		return new Promise((resolve, reject) => {
+			let screen = Utils.Graphics.rectangle(game.width, game.height, 0x000000);
+
+			screen.alpha = 0;
+
+			this.graphics.addChild(screen);
+
+			createjs.Tween.get(screen).to({ alpha: 1 }, duration).call(resolve).to({ alpha: 0 }, duration).call(() => {
+				screen.parent && screen.parent.removeChild(screen);
+			});
+		});
+	}
 }
 
 class UIElement {
@@ -120,21 +134,29 @@ class HeroStatus extends UIElement {
 	constructor(hero) {
 		super();
 
-		this.background = Utils.Graphics.rectangle(80, 80, 0x0000CC);
+		this.background = Utils.Graphics.rectangle(120, 70, 0x222222);
 		this.name = new PIXI.Text(hero.def.data.name, { fill: 0xFFFFFF, fontSize: 12 });
+		this.name.x = this.name.y = 10;
 
-		this.hp = new PIXI.Text(hero.stats.health + '/' + hero.stats.maxhealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
+		this.hp = new PIXI.Text(hero.stats.health + '/' + hero.stats.maxhealth + 'HP', { fill: 0xFFFFFF, fontSize: 11 });
+		this.hp.x = 10;
 		this.hp.y = 30;
+
+		this.bar = new Bar(100, 10, 0x000000, 0xCC0000);
+		this.bar.graphics.x = 10;
+		this.bar.graphics.y = 50;
 
 		this.graphics.addChild(this.background);
 		this.graphics.addChild(this.name);
 		this.graphics.addChild(this.hp);
+		this.graphics.addChild(this.bar.graphics);
 
 		this.hero = hero;
 	}
 
 	update() {
 		this.hp.text = this.hero.stats.health + '/' + this.hero.stats.maxhealth + 'HP';
+		this.bar.percentage = this.hero.healthPercentage;
 	}
 }
 

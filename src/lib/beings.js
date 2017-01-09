@@ -124,8 +124,7 @@ class Creature extends Being {
 
 		this.stats = {
 			health: hp,
-			maxhealth: hp,
-			wait: 1
+			maxhealth: hp
 		};
 
 		this.walkable = false;
@@ -164,7 +163,7 @@ class Hero extends Creature {
 		super(cell, def);
 
 		this.wait = 5;
-		this.stats.health = this.stats.maxhealth = 12;
+		this.stats = def.data.stats;
 
 		this.graphics = new PIXI.Sprite(game.textures.hero1);
 		this.name = def.data.name;
