@@ -301,7 +301,7 @@ class World extends EventEmitter {
 			this.battle.on('victory', () => {
 				console.log('victory');
 
-				this.view(this.party.leader.cell);
+				this.view(this.party.leader.cell, 300);
 				this.battle = null;
 
 				this.setState(this.STATE_IDLE);
@@ -426,11 +426,12 @@ class World extends EventEmitter {
 			let targetX = -cell.x * this.scale + (game.width / 2) - (this.scale / 2);
 			let targetY = -cell.y * this.scale + (game.height / 2) - (this.scale / 2);
 
-			// Clamp to edges of the world... Not sure if I want this.
+			// Clamp to edges of the world... Not sure if I want this as it restricts visibility of
+			// what's happening during battle especially.
 			// targetX = Utils.Math.clamp(targetX, game.width - this.width, 0);
 			// targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
 
-			createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration).call(() => {
+			createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration, createjs.Ease.sineInOut).call(() => {
 				this.viewing = cell;
 				resolve(cell);
 			});
