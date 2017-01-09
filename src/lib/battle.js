@@ -13,7 +13,13 @@ class Battle extends EventEmitter {
 		});
 
 		this.enemies.forEach(enemy => {
-			enemy.on('die', () => this.removeEnemy(enemy));
+			enemy.on('die', () => {
+				this.removeEnemy(enemy);
+
+				if (this.enemies.length > 0) {
+					this.world.view(this.getCenter(), 300);
+				}
+			});
 		});
 	}
 
@@ -31,7 +37,7 @@ class Battle extends EventEmitter {
 	}
 
 	start() {
-		this.action();
+		this.world.view(this.getCenter(), 300).then(cell => this.action());
 	}
 
 	next() {
@@ -59,9 +65,7 @@ class Battle extends EventEmitter {
 			let next = this.next();
 
 			if (next) {
-				this.world.view(next.cell, 300).then(cell => {
-					next.action(this).then(r => this.action())
-				});
+				next.action(this).then(r => this.action())
 			} else {
 				// This should never happen.
 				console.warn('Somehow ended up in a stuck battle.');
@@ -83,6 +87,22 @@ class Battle extends EventEmitter {
 
 	randomHero() {
 		return Utils.Random.fromArray(this.heroes);
+	}
+
+	getCenter() {
+		let lowX = null;
+		let lowY = null;
+		let highX = null;
+		let highY = null;
+
+		this.creatures.forEach(creature => {
+			if (lowX === null || creature.cell.x < lowX) lowX = creature.cell.x;
+			if (lowY === null || creature.cell.y < lowY) lowY = creature.cell.y;
+			if (highX === null || creature.cell.x > highX) highX = creature.cell.x;
+			if (highY === null || creature.cell.y > highY) highY = creature.cell.y;
+		});
+
+		return this.world.grid.find(lowX + ((highX - lowX) / 2), lowY + ((highY - lowY) / 2));
 	}
 }
 

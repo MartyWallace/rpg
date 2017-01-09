@@ -51,7 +51,7 @@ class World extends EventEmitter {
 		this.setState(this.STATE_IDLE);
 		this.party = null;
 		this.map = null;
-		this.nextBattle = 5;
+		this.nextBattle = 15;
 		this.battle = null;
 		this.lastHoverCell = null;
 
@@ -339,7 +339,7 @@ class World extends EventEmitter {
 	 * @param {String} ease The ease function to use when moving the camera.
 	 * @param {Boolean} clamp Whether the camera view should be clamped within the world or not.
 	 */
-	view(cell, duration = 0, ease = 'sineInOut', clamp = false) {
+	view(cell, duration = 0, ease = 'sineInOut', clamp = true) {
 		return new Promise((resolve, reject) => {
 			if (this.viewing === cell) {
 				// If we're already looking at the target cell, resolve immediately.

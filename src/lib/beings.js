@@ -177,8 +177,6 @@ class Hero extends Creature {
 			game.ui.showHeroActions(this, battle).then(selection => {
 				if (selection === 'Attack' || selection === 'Potion') {
 					let interaction = cell => {
-						game.world.off('interact', interaction);
-
 						if (cell.content instanceof Creature) {
 							let target = cell.content;
 
@@ -188,6 +186,8 @@ class Hero extends Creature {
 								target.takeDamage(damage);
 								createjs.Tween.get(this.graphics).to({ x: this.cell.x * game.world.scale, y: this.cell.y * game.world.scale }, 200).call(() => resolve());
 							});
+
+							game.world.off('interact', interaction);
 						} else {
 							// Must select a creature, do nothing for now. Will have skills where you
 							// can select a cell for splash damage later.
