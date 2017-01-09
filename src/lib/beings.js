@@ -1,3 +1,9 @@
+class Damage {
+	constructor(amount = 0) {
+		this.amount = Math.round(amount);
+	}
+}
+
 class Being extends EventEmitter {
 	constructor(world, cell, def) {
 		super();
@@ -127,17 +133,16 @@ class Creature extends Being {
 		this.layer = 'creatures';
 	}
 
-	takeDamage(amount) {
-		amount = Math.round(amount);
+	takeDamage(damage) {
+		game.ui.showDamage(this, damage);
 
-		game.ui.showDamage(this, amount);
-
-		this.stats.health -= amount;
+		this.stats.health -= damage.amount;
 
 		this.stats.health = Math.max(0, this.stats.health);
 		this.stats.health = Math.min(this.stats.health, this.stats.maxhealth);
 
 		if (this.stats.health <= 0) {
+			// This creature is dead.
 			this.die();
 		}
 	}
@@ -171,10 +176,14 @@ class Hero extends Creature {
 	action(battle) {
 		return new Promise(resolve => {
 			game.ui.showHeroActions(this, battle).then(selection => {
-				if (selection === 'Attack') {
+				if (selection === 'Attack' || selection === 'Potion') {
 					let interaction = cell => {
 						if (cell.content instanceof Creature) {
-							cell.content.takeDamage(Utils.Random.between(1, 3));
+							let damage = new Damage(
+								selection === 'Attack' ? Utils.Random.between(1, 3) : Utils.Random.between(-3, -1)
+							);
+
+							cell.content.takeDamage(damage);
 
 							game.world.off('interact', interaction);
 							resolve();
@@ -210,7 +219,7 @@ class Skeleton extends Enemy {
 		this.wait = 6;
 		this.name = 'Skeleton';
 
-		this.graphics = Utils.Graphics.circle(world.scale / 2, 0x00CC22);
+		this.graphics = Utils.Graphics.circle(world.scale / 2, 0x338811);
 
 		this.setCell(cell);
 	}
@@ -219,7 +228,7 @@ class Skeleton extends Enemy {
 		return new Promise(resolve => {
 			setTimeout(() => {
 				let hero = battle.randomHero();
-				hero.takeDamage(Utils.Random.between(1, 3));
+				hero.takeDamage(new Damage(Utils.Random.between(1, 3)));
 
 				resolve();
 			}, 1000);

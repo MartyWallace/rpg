@@ -141,7 +141,7 @@ class World extends EventEmitter {
 		this.setState(this.STATE_IDLE);
 		this.party = null;
 		this.map = null;
-		this.nextBattle = 30;
+		this.nextBattle = 5;
 		this.battle = null;
 		this.lastHoverCell = null;
 
@@ -426,9 +426,8 @@ class World extends EventEmitter {
 			let targetX = -cell.x * this.scale + (game.width / 2) - (this.scale / 2);
 			let targetY = -cell.y * this.scale + (game.height / 2) - (this.scale / 2);
 
-			// TODO: Should use grid width and height, not graphics.
-			targetX = Utils.Math.clamp(targetX, game.width - this.graphics.width, 0);
-			targetY = Utils.Math.clamp(targetY, game.height - this.graphics.height, 0);
+			targetX = Utils.Math.clamp(targetX, game.width - this.width, 0);
+			targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
 
 			createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration).call(() => {
 				this.viewing = cell;
@@ -445,6 +444,9 @@ class World extends EventEmitter {
 		this.state = state;
 		this.emit('state', state);
 	}
+
+	get width() { return this.grid.width * this.scale; }
+	get height() { return this.grid.height * this.scale; }
 }
 
 class Map {

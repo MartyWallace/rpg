@@ -24,7 +24,7 @@ class UI {
 	}
 
 	showHeroActions(hero, battle) {
-		return this.simpleOptions(['Attack', 'Skip']);
+		return this.simpleOptions(['Attack', 'Potion', 'Skip']);
 	}
 
 	simpleOptions(options) {
@@ -76,9 +76,9 @@ class UI {
 		});
 	}
 
-	showDamage(creature, amount) {
-		let display = new PIXI.Text(amount, { fill: 0x000000 });
-		display.position.set(creature.cell.x * game.world.scale, creature.cell.y * game.world.scale);
+	showDamage(creature, damage) {
+		let display = new PIXI.Text(Math.abs(damage.amount), { fill: damage.amount > 0 ? 0x000000 : 0x00CC00 });
+		display.position.set(creature.cell.x * game.world.scale + (game.world.scale / 2), creature.cell.y * game.world.scale + (game.world.scale / 2));
 
 		game.world.layer('ui').addChild(display);
 
@@ -144,17 +144,50 @@ class CreatureStatus extends UIElement {
 
 		this.creature = creature;
 
-		this.background = Utils.Graphics.rectangle(120, 90, 0x0000CC);
+		this.background = Utils.Graphics.rectangle(160, 80, 0x333333);
 		this.name = new PIXI.Text(creature.name, { fill: 0xFFFFFF, fontSize: 12 });
+		this.name.y = 10;
 		this.hp = new PIXI.Text(creature.stats.health + '/' + creature.stats.maxhealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
 		this.hp.y = 30;
+
+		this.name.x = this.hp.x = 10;
 
 		this.graphics.addChild(this.background);
 		this.graphics.addChild(this.name);
 		this.graphics.addChild(this.hp);
+
+		this.bar = new Bar(140, 10, 0x252525, 0xFF0000);
+		this.bar.graphics.x = 10;
+		this.bar.graphics.y = 50;
+
+		this.graphics.addChild(this.bar.graphics);
 	}
 
 	update() {
 		this.hp.text = this.creature.stats.health + '/' + this.creature.stats.maxhealth + 'HP';
+		this.bar.percentage = this.creature.healthPercentage;
+	}
+}
+
+class Bar {
+	constructor(width, height, background = 0x000000, foreground = 0xFFFFFF) {
+		this.graphics = new PIXI.Container();
+
+		this.background = Utils.Graphics.rectangle(width, height, background);
+		this.foreground = Utils.Graphics.rectangle(width, height, foreground);
+
+		this.graphics.addChild(this.background);
+		this.graphics.addChild(this.foreground);
+
+		this._percentage = 1.0;
+	}
+
+	set percentage(value) {
+		this._percentage = Utils.Math.clamp(value, 0, 1);
+		this.foreground.scale.x = this._percentage;
+	}
+
+	get percentage() {
+		return this._percentage;
 	}
 }
