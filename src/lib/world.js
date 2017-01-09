@@ -98,9 +98,9 @@ class Battle extends EventEmitter {
 			let next = this.next();
 
 			if (next) {
-				this.world.view(next.cell);
-
-				next.action(this).then(r => this.action());
+				this.world.view(next.cell, 300).then(cell => {
+					next.action(this).then(r => this.action())
+				});
 			} else {
 				// This should never happen.
 				console.warn('Somehow ended up in a stuck battle.');
@@ -426,8 +426,9 @@ class World extends EventEmitter {
 			let targetX = -cell.x * this.scale + (game.width / 2) - (this.scale / 2);
 			let targetY = -cell.y * this.scale + (game.height / 2) - (this.scale / 2);
 
-			targetX = Utils.Math.clamp(targetX, game.width - this.width, 0);
-			targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
+			// Clamp to edges of the world... Not sure if I want this.
+			// targetX = Utils.Math.clamp(targetX, game.width - this.width, 0);
+			// targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
 
 			createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration).call(() => {
 				this.viewing = cell;

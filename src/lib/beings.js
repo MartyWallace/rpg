@@ -179,16 +179,21 @@ class Hero extends Creature {
 				if (selection === 'Attack' || selection === 'Potion') {
 					let interaction = cell => {
 						if (cell.content instanceof Creature) {
-							let damage = new Damage(
-								selection === 'Attack' ? Utils.Random.between(1, 3) : Utils.Random.between(-3, -1)
-							);
+							game.world.view(cell, 300).then(cell => {
+								setTimeout(() => {
+									let damage = new Damage(
+										selection === 'Attack' ? Utils.Random.between(1, 3) : Utils.Random.between(-3, -1)
+									);
 
-							cell.content.takeDamage(damage);
+									cell.content.takeDamage(damage);
 
-							game.world.off('interact', interaction);
-							resolve();
+									game.world.off('interact', interaction);
+									resolve();
+								}, 500);
+							});
 						} else {
-							// Must select a creature.
+							// Must select a creature, do nothing for now. Will have skills where you
+							// can select a cell for splash damage later.
 							// ...
 						}
 					};
@@ -226,12 +231,14 @@ class Skeleton extends Enemy {
 
 	action(battle) {
 		return new Promise(resolve => {
-			setTimeout(() => {
-				let hero = battle.randomHero();
-				hero.takeDamage(new Damage(Utils.Random.between(1, 3)));
+			let target = battle.randomHero();
 
-				resolve();
-			}, 1000);
+			game.world.view(target.cell, 300).then(cell => {
+				setTimeout(() => {
+					target.takeDamage(new Damage(Utils.Random.between(1, 2)));
+					resolve();
+				}, 500);
+			});
 		});
 	}
 }
