@@ -421,20 +421,32 @@ class World extends EventEmitter {
 		this.beings.items.forEach(being => being.update());
 	}
 
-	view(cell, duration = 0) {
+	/**
+	 * Move a new cell into the center of the camera.
+	 * 
+	 * @param {Cell} cell The cell to look at.
+	 * @param {Number} duration The time to spend tweening the camera to the target cell.
+	 * @param {Boolean} clamp Whether the camera view should be clamped within the world or not.
+	 */
+	view(cell, duration = 0, clamp = false) {
 		return new Promise((resolve, reject) => {
-			let targetX = -cell.x * this.scale + (game.width / 2) - (this.scale / 2);
-			let targetY = -cell.y * this.scale + (game.height / 2) - (this.scale / 2);
-
-			// Clamp to edges of the world... Not sure if I want this as it restricts visibility of
-			// what's happening during battle especially.
-			// targetX = Utils.Math.clamp(targetX, game.width - this.width, 0);
-			// targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
-
-			createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration, createjs.Ease.sineInOut).call(() => {
-				this.viewing = cell;
+			if (this.viewing === cell) {
+				// If we're already looking at the target cell, resolve immediately.
 				resolve(cell);
-			});
+			} else {
+				let targetX = -cell.x * this.scale + (game.width / 2) - (this.scale / 2);
+				let targetY = -cell.y * this.scale + (game.height / 2) - (this.scale / 2);
+
+				if (clamp) {
+					targetX = Utils.Math.clamp(targetX, game.width - this.width, 0);
+					targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
+				}
+
+				createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration, createjs.Ease.sineInOut).call(() => {
+					this.viewing = cell;
+					resolve(cell);
+				});
+			}
 		});
 	}
 
