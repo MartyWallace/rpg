@@ -5,6 +5,10 @@ class UI {
 		this.heroStatuses = [];
 		this.creatureStatus = null;
 
+		this.hud = new HUD();
+		this.hud.graphics.y = GAME_HEIGHT;
+		this.graphics.addChild(this.hud.graphics);
+
 		game.world.on('load', () => {
 			this.showHeroStatuses(game.world.party);
 		});
@@ -24,19 +28,18 @@ class UI {
 	}
 
 	showHeroActions(hero, battle) {
-		return this.simpleOptions(['Attack', 'Potion', 'Skip']);
-	}
-
-	simpleOptions(options) {
 		return new Promise(resolve => {
 			let menu = new PIXI.Container();
 
+			let abilities = [{ type: 'attack' }].concat(hero.abilities);
+			abilities.push({ type: 'skip' });
+
 			menu.position.set(100, 100);
 
-			options.forEach((option, index) => {
+			abilities.forEach((ability, index) => {
 				let btn = new PIXI.Container();
 				let back = Utils.Graphics.rectangle(160, 30, 0x0000CC);
-				let text = new PIXI.Text(option, { fill: 0xFFFFFF, fontSize: 14 });
+				let text = new PIXI.Text(ability.type, { fill: 0xFFFFFF, fontSize: 14 });
 
 				btn.addChild(back);
 				btn.addChild(text);
@@ -47,7 +50,7 @@ class UI {
 				btn.buttonMode = true;
 
 				btn.on('click', event => {
-					resolve(option);
+					resolve(ability);
 					menu.parent && menu.parent.removeChild(menu);
 				});
 
@@ -67,9 +70,9 @@ class UI {
 			let status = new HeroStatus(hero);
 
 			status.graphics.x = 20 + (index * 130);
-			status.graphics.y = GAME_HEIGHT - 90;
+			status.graphics.y = 30;
 
-			this.graphics.addChild(status.graphics);
+			this.hud.graphics.addChild(status.graphics);
 
 			this.heroStatuses.push(status);
 			this.elements.push(status);
@@ -127,6 +130,13 @@ class UIElement {
 
 	destroy() {
 		this.graphics.parent && this.graphics.parent.removeChild(this.graphics);
+	}
+}
+
+class HUD {
+	constructor() {
+		this.graphics = new PIXI.Graphics();
+		this.graphics.addChild(Utils.Graphics.rectangle(GAME_WIDTH, HUD_HEIGHT, 0x333333));
 	}
 }
 

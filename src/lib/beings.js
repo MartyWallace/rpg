@@ -173,37 +173,30 @@ class Hero extends Creature {
 
 	action(battle) {
 		return new Promise(resolve => {
-			game.ui.showHeroActions(this, battle).then(selection => {
-				if (selection === 'Attack' || selection === 'Potion') {
-					let interaction = cell => {
-						if (cell.content instanceof Creature) {
-							let target = cell.content;
+			game.ui.showHeroActions(this, battle).then(ability => {
+				let interaction = cell => {
+					if (cell.content instanceof Creature) {
+						Abilities.find(ability.type).behaviour(this, battle, cell.content).then(() => resolve());
 
-							createjs.Tween.get(this.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
-								let damage = new Damage(selection === 'Attack' ? Utils.Random.between(1, 3) : Utils.Random.between(-15, -12));
+						game.world.off('interact', interaction);
+					} else {
+						// Must select a creature, do nothing for now. Will have skills where you
+						// can select a cell for splash damage later.
+						// ...
+					}
+				};
 
-								target.takeDamage(damage);
-								createjs.Tween.get(this.graphics).to({ x: this.cell.x * game.world.scale, y: this.cell.y * game.world.scale }, 200).call(() => resolve());
-							});
-
-							game.world.off('interact', interaction);
-						} else {
-							// Must select a creature, do nothing for now. Will have skills where you
-							// can select a cell for splash damage later.
-							// ...
-						}
-					};
-
-					game.world.on('interact', interaction);
-				} else {
-					resolve();
-				}
+				game.world.on('interact', interaction);
 			});
 		});
 	}
 
 	save() {
 		return this.def.data;
+	}
+
+	get abilities() {
+		return this.def.data.abilities;
 	}
 }
 
@@ -230,11 +223,8 @@ class Skeleton extends Enemy {
 			let target = battle.randomHero();
 
 			setTimeout(() => {
-				createjs.Tween.get(this.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
-					target.takeDamage(new Damage(Utils.Random.between(1, 2)));
-					createjs.Tween.get(this.graphics).to({ x: this.cell.x * game.world.scale, y: this.cell.y * game.world.scale }, 200).call(() => resolve());
-				});
-			}, 500);
+				Abilities.find('attack').behaviour(this, battle, target).then(() => resolve());
+			}, 200);
 		});
 	}
 }
