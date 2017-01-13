@@ -48,6 +48,12 @@ class UI {
 				let iconBack = Utils.Graphics.rectangle(30, 30, 0x111111);
 				icon.addChild(iconBack);
 
+				if (ability.icon) {
+					let iconImage = PIXI.Sprite.fromImage(ability.icon);
+					iconImage.width = iconImage.height = 30;
+					icon.addChild(iconImage);
+				}
+
 				text.position.set(45, 12);
 				icon.position.set(5, 5);
 

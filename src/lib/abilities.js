@@ -13,6 +13,7 @@ const Abilities = {
 			return {
 				name: 'Attack',
 				flow: Abilities.FLOW_CREATURE_TARGETED,
+				icon: '/textures/ability-icons/attack.png',
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
@@ -32,6 +33,7 @@ const Abilities = {
 			return {
 				name: 'Skip',
 				flow: Abilities.FLOW_UNTARGETED,
+				icon: '/textures/ability-icons/skip.png',
 
 				behaviour(creature, battle) {
 					return new Promise(resolve => resolve());
@@ -46,6 +48,7 @@ const Abilities = {
 			return {
 				name: 'Bandage',
 				flow: Abilities.FLOW_CREATURE_TARGETED,
+				icon: '/textures/ability-icons/bandage.png',
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
