@@ -27,11 +27,19 @@ class UI {
 		return new Promise(resolve => {
 			let menu = new PIXI.Container();
 
-			menu.position.set(160, 20);
+			menu.position.set(20, 110);
+
+			let nameBox = Utils.Graphics.rectangle(160, 26, 0x333333);
+			let nameText = new PIXI.Text(hero.name, { fill: 0xEEEEEE, fontSize: 12 });
+
+			nameText.position.set(5, 5);
+
+			menu.addChild(nameBox);
+			menu.addChild(nameText);
 
 			hero.abilities.forEach((type, index) => {
 				let ability = Abilities.find(type);
-				
+
 				let btn = new PIXI.Container();
 				let back = Utils.Graphics.rectangle(160, 40, 0x222222);
 				let text = new PIXI.Text(ability.name, { fill: 0xDDDDDD, fontSize: 12 });
@@ -47,7 +55,7 @@ class UI {
 				btn.addChild(icon);
 				btn.addChild(text);
 
-				btn.y = index * 45;
+				btn.y = 31 + index * 45;
 
 				btn.interactive = true;
 				btn.buttonMode = true;
@@ -72,8 +80,8 @@ class UI {
 		party.heroes.forEach((hero, index) => {
 			let status = new HeroStatus(hero);
 
-			status.graphics.x = 20;
-			status.graphics.y = 20 + (index * 75);
+			status.graphics.x = 20 + (index * 125);
+			status.graphics.y = 20;
 
 			this.graphics.addChild(status.graphics);
 
@@ -100,6 +108,16 @@ class UI {
 		this.elements.push(this.creatureStatus);
 
 		game.world.layer('ui').addChild(this.creatureStatus.graphics);
+	}
+
+	showVictoryScreen(result) {
+		return new Promise((resolve, reject) => {
+			let screen = new VictoryScreen(result);
+
+			this.graphics.addChild(screen.graphics);
+
+			screen.on('close', () => resolve());
+		});
 	}
 
 	hideCreatureStatus() {
@@ -218,4 +236,54 @@ class Bar {
 	get percentage() {
 		return this._percentage;
 	}
+}
+
+class VictoryScreen extends EventEmitter {
+	constructor(result) {
+		super();
+
+		this.result = result;
+		this.graphics = new PIXI.Container();
+		this.graphics.interactive = true;
+		this.graphics.interactiveChildren = true;
+
+		this.curtain = Utils.Graphics.rectangle(game.width, game.height, 0x000000);
+		this.curtain.alpha = 0.3;
+
+		this.modal = new PIXI.Container();
+		
+		this.modalBackground = Utils.Graphics.rectangle(300, 400, 0x222222);
+		this.modal.addChild(this.modalBackground);
+
+		this.modal.position.set((game.width - 300) / 2, (game.height - 400) / 2);
+
+		this.graphics.addChild(this.curtain);
+		this.graphics.addChild(this.modal);
+
+		this.okButton = new PIXI.Container();
+		this.okButton.interactive = this.okButton.buttonMode = true;
+		this.okButton.position.set(20, 340);
+		this.okButton.addChild(Utils.Graphics.rectangle(260, 40, 0xAAAAAA));
+		
+		let okText = new PIXI.Text('Continue', { fill: 0x000000, fontSize: 14 });
+		okText.position.set(10, 10);
+
+		let text = new PIXI.Text('Victory! Earned ' + result.exp + ' EXP.', { fill: 0xFFFFFF, fontSize: 16 });
+		text.position.set(20, 20);
+		this.modal.addChild(text);
+
+		this.okButton.addChild(okText);
+
+		let click = event => {
+			this.graphics.parent && this.graphics.parent.removeChild(this.graphics);
+			this.emit('close');
+
+			this.okButton.off('click', click);
+		}
+
+		this.okButton.on('click', click);
+
+		this.modal.addChild(this.okButton);
+	}
+
 }

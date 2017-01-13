@@ -33,7 +33,7 @@ class Game {
 					x: 1, y: 3,
 					heroes: [
 						{ name: 'Marty', attrs: { color: 0xFFFFFF }, stats: { health: 36, maxhealth: 36 }, abilities: ['attack', 'skip'] },
-						{ name: 'Carlie', attrs: { color: 0xFFFFFF }, stats: { health: 27, maxhealth: 27 }, abilities: ['attack', 'skip'] },
+						{ name: 'Carlie', attrs: { color: 0xFFFFFF }, stats: { health: 27, maxhealth: 27 }, abilities: ['attack', 'bandage', 'skip',] },
 						{ name: 'Mia', attrs: { color: 0xFFFFFF }, stats: { health: 21, maxhealth: 21 }, abilities: ['attack', 'skip'] }
 					]
 				});

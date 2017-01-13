@@ -207,13 +207,13 @@ class World extends EventEmitter {
 			this.battle = new Battle(this, this.party.heroes, enemies);
 			this.battle.start();
 
-			this.battle.on('victory', () => {
-				console.log('victory');
+			this.battle.on('victory', result => {
+				game.ui.showVictoryScreen(result).then(() => {
+					this.view(this.party.leader.cell, 300);
+					this.battle = null;
 
-				this.view(this.party.leader.cell, 300);
-				this.battle = null;
-
-				this.setState(this.STATE_IDLE);
+					this.setState(this.STATE_IDLE);
+				});
 			});
 
 			this.emit('startBattle', this.battle);

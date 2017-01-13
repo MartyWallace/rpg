@@ -37,6 +37,25 @@ const Abilities = {
 					return new Promise(resolve => resolve());
 				}
 			};
+		},
+
+		/**
+		 * Bandage a target, recovering HP.
+		 */
+		bandage() {
+			return {
+				name: 'Bandage',
+				flow: Abilities.FLOW_CREATURE_TARGETED,
+
+				behaviour(creature, battle, target) {
+					return new Promise((resolve, reject) => {
+						createjs.Tween.get(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+							target.takeDamage(new Damage(Utils.Random.between(-7, -5)));
+							createjs.Tween.get(creature.graphics).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
+						});
+					});
+				}
+			}
 		}
 	},
 
