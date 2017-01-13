@@ -5,10 +5,6 @@ class UI {
 		this.heroStatuses = [];
 		this.creatureStatus = null;
 
-		this.hud = new HUD();
-		this.hud.graphics.y = GAME_HEIGHT;
-		this.graphics.addChild(this.hud.graphics);
-
 		game.world.on('load', () => {
 			this.showHeroStatuses(game.world.party);
 		});
@@ -31,20 +27,27 @@ class UI {
 		return new Promise(resolve => {
 			let menu = new PIXI.Container();
 
-			let abilities = [{ type: 'attack' }].concat(hero.abilities);
-			abilities.push({ type: 'skip' });
+			menu.position.set(160, 20);
 
-			menu.position.set(100, 100);
-
-			abilities.forEach((ability, index) => {
+			hero.abilities.forEach((type, index) => {
+				let ability = Abilities.find(type);
+				
 				let btn = new PIXI.Container();
-				let back = Utils.Graphics.rectangle(160, 30, 0x0000CC);
-				let text = new PIXI.Text(ability.type, { fill: 0xFFFFFF, fontSize: 14 });
+				let back = Utils.Graphics.rectangle(160, 40, 0x222222);
+				let text = new PIXI.Text(ability.name, { fill: 0xDDDDDD, fontSize: 12 });
+				let icon = new PIXI.Container();
+
+				let iconBack = Utils.Graphics.rectangle(30, 30, 0x111111);
+				icon.addChild(iconBack);
+
+				text.position.set(45, 12);
+				icon.position.set(5, 5);
 
 				btn.addChild(back);
+				btn.addChild(icon);
 				btn.addChild(text);
 
-				btn.y = index * 30;
+				btn.y = index * 45;
 
 				btn.interactive = true;
 				btn.buttonMode = true;
@@ -69,10 +72,10 @@ class UI {
 		party.heroes.forEach((hero, index) => {
 			let status = new HeroStatus(hero);
 
-			status.graphics.x = 20 + (index * 130);
-			status.graphics.y = 30;
+			status.graphics.x = 20;
+			status.graphics.y = 20 + (index * 75);
 
-			this.hud.graphics.addChild(status.graphics);
+			this.graphics.addChild(status.graphics);
 
 			this.heroStatuses.push(status);
 			this.elements.push(status);
@@ -130,13 +133,6 @@ class UIElement {
 
 	destroy() {
 		this.graphics.parent && this.graphics.parent.removeChild(this.graphics);
-	}
-}
-
-class HUD {
-	constructor() {
-		this.graphics = new PIXI.Graphics();
-		this.graphics.addChild(Utils.Graphics.rectangle(GAME_WIDTH, HUD_HEIGHT, 0x333333));
 	}
 }
 

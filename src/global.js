@@ -1,7 +1,6 @@
 const DRAW_SCALE = 60;
 const GAME_WIDTH = 16 * DRAW_SCALE;
 const GAME_HEIGHT = 12 * DRAW_SCALE;
-const HUD_HEIGHT = 120;
 
 const LEVELS = [{
 	width: 30,

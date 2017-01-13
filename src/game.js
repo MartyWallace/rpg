@@ -1,7 +1,7 @@
 const canvas = document.querySelector('canvas');
 const stage = new PIXI.Container();
 
-const renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT + HUD_HEIGHT, {
+const renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT, {
 	view: canvas,
 	backgroundColor: 0x000000
 });
@@ -32,9 +32,9 @@ class Game {
 				this.world.load(LEVELS[1], {
 					x: 1, y: 3,
 					heroes: [
-						{ name: 'Marty', attrs: { color: 0xFFFFFF }, stats: { health: 36, maxhealth: 36 }, abilities: [] },
-						{ name: 'Carlie', attrs: { color: 0xFFFFFF }, stats: { health: 27, maxhealth: 27 }, abilities: [] },
-						{ name: 'Mia', attrs: { color: 0xFFFFFF }, stats: { health: 21, maxhealth: 21 }, abilities: [] }
+						{ name: 'Marty', attrs: { color: 0xFFFFFF }, stats: { health: 36, maxhealth: 36 }, abilities: ['attack', 'skip'] },
+						{ name: 'Carlie', attrs: { color: 0xFFFFFF }, stats: { health: 27, maxhealth: 27 }, abilities: ['attack', 'skip'] },
+						{ name: 'Mia', attrs: { color: 0xFFFFFF }, stats: { health: 21, maxhealth: 21 }, abilities: ['attack', 'skip'] }
 					]
 				});
 

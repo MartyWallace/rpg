@@ -122,6 +122,10 @@ class Creature extends Being {
 
 		let hp = Math.round(Utils.Random.between(4, 6));
 
+		this.level = 1;
+		this.exp = 0;
+		this.nextLevel = 10;
+
 		this.stats = {
 			health: hp,
 			maxhealth: hp
@@ -174,19 +178,32 @@ class Hero extends Creature {
 	action(battle) {
 		return new Promise(resolve => {
 			game.ui.showHeroActions(this, battle).then(ability => {
-				let interaction = cell => {
-					if (cell.content instanceof Creature) {
-						Abilities.find(ability.type).behaviour(this, battle, cell.content).then(() => resolve());
+				if (ability.flow === Abilities.FLOW_CREATURE_TARGETED || ability.flow === Abilities.FLOW_CELL_TARGETED) {
+					let interaction = cell => {
+						if (ability.flow === Abilities.FLOW_CREATURE_TARGETED) {
+							if (cell.content instanceof Creature) {
+								ability.behaviour(this, battle, cell.content).then(() => resolve());
 
-						game.world.off('interact', interaction);
-					} else {
-						// Must select a creature, do nothing for now. Will have skills where you
-						// can select a cell for splash damage later.
-						// ...
-					}
-				};
+								game.world.off('interact', interaction);
+							} else {
+								// Need to target a creature.
+								// ...
+							}
+						} else if (ability.flow === Abilities.FLOW_CELL_TARGETED) {
+							ability.behaviour(this, battle, cell).then(() => resolve());
 
-				game.world.on('interact', interaction);
+							game.world.off('interact', interaction);
+						}
+					};
+
+					game.world.on('interact', interaction);
+				} else if (ability.flow === Abilities.FLOW_UNTARGETED) {
+					// Instant ability.
+					console.log(ability);
+					ability.behaviour(this, battle).then(() => resolve());
+				} else {
+					console.warn('Unknown ability flow type: "' + ability.flow + '".');
+				}
 			});
 		});
 	}
