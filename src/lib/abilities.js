@@ -18,7 +18,11 @@ const Abilities = {
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
 						createjs.Tween.get(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
-							target.takeDamage(new Damage(Utils.Random.between(4, 6)));
+							let baseDamage = 1 + creature.stats.strength / 4;
+
+							console.log(baseDamage * 0.85, baseDamage * 1.25);
+
+							target.takeDamage(new Damage(Utils.Random.between(baseDamage * 0.85, baseDamage * 1.15)));
 							createjs.Tween.get(creature.graphics).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
 						});
 					});

@@ -168,7 +168,7 @@ class HeroStatus extends UIElement {
 		this.name = new PIXI.Text(hero.def.data.name, { fill: 0xFFFFFF, fontSize: 12 });
 		this.name.x = this.name.y = 10;
 
-		this.hp = new PIXI.Text(hero.stats.health + '/' + hero.stats.maxhealth + 'HP', { fill: 0xFFFFFF, fontSize: 11 });
+		this.hp = new PIXI.Text(hero.stats.health + '/' + hero.stats.maxHealth + 'HP', { fill: 0xFFFFFF, fontSize: 11 });
 		this.hp.x = 10;
 		this.hp.y = 30;
 
@@ -185,7 +185,7 @@ class HeroStatus extends UIElement {
 	}
 
 	update() {
-		this.hp.text = this.hero.stats.health + '/' + this.hero.stats.maxhealth + 'HP';
+		this.hp.text = this.hero.stats.health + '/' + this.hero.stats.maxHealth + 'HP';
 		this.bar.percentage = this.hero.healthPercentage;
 	}
 }
@@ -199,7 +199,7 @@ class CreatureStatus extends UIElement {
 		this.background = Utils.Graphics.rectangle(160, 80, 0x333333);
 		this.name = new PIXI.Text(creature.name, { fill: 0xFFFFFF, fontSize: 12 });
 		this.name.y = 10;
-		this.hp = new PIXI.Text(creature.stats.health + '/' + creature.stats.maxhealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
+		this.hp = new PIXI.Text(creature.stats.health + '/' + creature.stats.maxHealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
 		this.hp.y = 30;
 
 		this.name.x = this.hp.x = 10;
@@ -216,7 +216,7 @@ class CreatureStatus extends UIElement {
 	}
 
 	update() {
-		this.hp.text = this.creature.stats.health + '/' + this.creature.stats.maxhealth + 'HP';
+		this.hp.text = this.creature.stats.health + '/' + this.creature.stats.maxHealth + 'HP';
 		this.bar.percentage = this.creature.healthPercentage;
 	}
 }

@@ -4,6 +4,43 @@ class Damage {
 	}
 }
 
+/**
+ * Creature stats e.g. health, strength.
+ */
+class Stats {
+	constructor(creature, base) {
+		this.level = 1;
+		this.health = 1;
+		this.maxHealth = 1;
+		this.strength = 1;
+
+		if (base) {
+			this.merge(base);
+		}
+	}
+
+	merge(stats) {
+		for (let stat in stats) {
+			if (this.hasOwnProperty(stat)) {
+				this[stat] = Math.round(stats[stat]);
+			}
+		}
+	}
+
+	save() {
+		return {
+			level: this.level,
+			health: this.health,
+			maxHealth: this.maxHealth,
+			strength: this.strength
+		};
+	}
+
+	get healthPercentage() {
+		return this.health / this.maxHealth;
+	}
+}
+
 class Being extends EventEmitter {
 	constructor(cell, def) {
 		super();
@@ -120,17 +157,7 @@ class Creature extends Being {
 	constructor(cell, def) {
 		super(cell, def);
 
-		let hp = Math.round(Utils.Random.between(4, 6));
-
-		this.level = 1;
-		this.exp = 0;
-		this.nextLevel = 10;
-
-		this.stats = {
-			health: hp,
-			maxhealth: hp
-		};
-
+		this.stats = new Stats(this);
 		this.walkable = false;
 		this.layer = 'creatures';
 	}
@@ -141,7 +168,7 @@ class Creature extends Being {
 		this.stats.health -= damage.amount;
 
 		this.stats.health = Math.max(0, this.stats.health);
-		this.stats.health = Math.min(this.stats.health, this.stats.maxhealth);
+		this.stats.health = Math.min(this.stats.health, this.stats.maxHealth);
 
 		if (this.stats.health <= 0) {
 			// This creature is dead.
@@ -158,7 +185,7 @@ class Creature extends Being {
 	}
 
 	get healthPercentage() {
-		return this.stats.health / this.stats.maxhealth;
+		return this.stats.health / this.stats.maxHealth;
 	}
 }
 
@@ -167,7 +194,7 @@ class Hero extends Creature {
 		super(cell, def);
 
 		this.wait = 5;
-		this.stats = def.data.stats;
+		this.stats.merge(def.data.stats);
 
 		this.graphics = new PIXI.Sprite(game.textures.hero1);
 		this.name = def.data.name;
@@ -209,7 +236,12 @@ class Hero extends Creature {
 	}
 
 	save() {
-		return this.def.data;
+		return {
+			name: this.def.data.name,
+			stats: this.stats.save(),
+			attrs: this.def.data.attrs,
+			abilities: this.def.data.abilities
+		};
 	}
 
 	get abilities() {
@@ -229,6 +261,14 @@ class Skeleton extends Enemy {
 
 		this.wait = 6;
 		this.name = 'Skeleton';
+
+		let health = Utils.Random.between(8, 12);
+		
+		this.stats.merge({
+			health,
+			maxHealth: health,
+			strength: Utils.Random.between(8, 10)
+		});
 
 		this.graphics = new PIXI.Sprite(game.textures.skeleton);
 

@@ -8,6 +8,8 @@ class Battle extends EventEmitter {
 		this.creatures = heroes.concat(enemies);
 		this.result = new BattleResult();
 
+		this.marker = new Utils.Graphics.rectangle(10, 10, 0xFF0000);
+
 		this.timeline = this.creatures.map(creature => {
 			return { creature, count: 0 };
 		});
@@ -59,10 +61,15 @@ class Battle extends EventEmitter {
 	}
 
 	action() {
+		this.marker.parent && game.world.layer('ui').removeChild(this.marker);
+
 		if (this.enemies.length === 0) this.victory();
 		else if (this.heroes.length === 0) this.defeat();
 		else {
 			let next = this.next();
+			
+			this.marker.position.set(next.cell.x * game.world.scale, next.cell.y * game.world.scale);
+			game.world.layer('ui').addChild(this.marker);
 
 			if (next) {
 				next.action(this).then(r => this.action())
@@ -75,10 +82,12 @@ class Battle extends EventEmitter {
 
 	victory() {
 		this.emit('victory', this.result);
+		this.cleanup();
 	}
 
 	defeat() {
 		this.emit('defeat');
+		this.cleanup();
 	}
 
 	randomEnemy() {
@@ -87,6 +96,10 @@ class Battle extends EventEmitter {
 
 	randomHero() {
 		return Utils.Random.fromArray(this.heroes);
+	}
+
+	cleanup() {
+		this.marker.parent && game.world.layer('ui').removeChild(this.marker);
 	}
 
 	getCenter() {

@@ -32,9 +32,9 @@ class Game {
 				this.world.load(LEVELS[1], {
 					x: 1, y: 3,
 					heroes: [
-						{ name: 'Marty', attrs: { color: 0xFFFFFF }, stats: { health: 36, maxhealth: 36 }, abilities: ['attack', 'skip'] },
-						{ name: 'Carlie', attrs: { color: 0xFFFFFF }, stats: { health: 27, maxhealth: 27 }, abilities: ['attack', 'bandage', 'skip',] },
-						{ name: 'Mia', attrs: { color: 0xFFFFFF }, stats: { health: 21, maxhealth: 21 }, abilities: ['attack', 'skip'] }
+						{ name: 'Marty', attrs: { color: 0xFFFFFF }, stats: { health: 36, maxHealth: 36, strength: 15 }, abilities: ['attack', 'skip'] },
+						{ name: 'Carlie', attrs: { color: 0xFFFFFF }, stats: { health: 27, maxHealth: 27, strength: 11 }, abilities: ['attack', 'bandage', 'skip',] },
+						{ name: 'Mia', attrs: { color: 0xFFFFFF }, stats: { health: 21, maxHealth: 21, strength: 7 }, abilities: ['attack', 'skip'] }
 					]
 				});
 
