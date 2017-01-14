@@ -118,7 +118,12 @@ class World extends EventEmitter {
 						return new Promise((resolve, reject) => {
 							this.view(cell, 200);
 							this.party.moveToCell(cell, 200).then(cell => {
-								this.nextBattle -= 1;
+								// Only count down if there are enemies for this area. If there
+								// are no enemies listed, this area is "safe" (probably a town or
+								// similar).
+								if (this.map.enemies.length > 0) {
+									this.nextBattle -= 1;
+								}
 
 								if (this.nextBattle <= 0) reject(true);
 								else resolve();
