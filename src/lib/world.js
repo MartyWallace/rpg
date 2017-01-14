@@ -273,6 +273,7 @@ class World extends EventEmitter {
 	}
 
 	setupBoundaries(width, height, doors) {
+		/*
 		for (let x = 0; x < width; x++) {
 			for (let y = 0; y < height; y++) {
 				if ((x === 0 || y === 0 || x === width - 1 || y === height - 1) && !this.map.hasDoorAt(x, y)) {
@@ -280,6 +281,7 @@ class World extends EventEmitter {
 				}
 			}
 		}
+		*/
 
 		doors.forEach(door => this.create({ type: 'Door', x: door.x, y: door.y, destination: door.destination }));
 	}

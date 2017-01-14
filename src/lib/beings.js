@@ -13,6 +13,8 @@ class Stats {
 		this.health = 1;
 		this.maxHealth = 1;
 		this.strength = 1;
+		this.evasion = 1;
+		this.accuracy = 1; // TODO: Probably rename this later.
 
 		if (base) {
 			this.merge(base);
@@ -267,7 +269,8 @@ class Skeleton extends Enemy {
 		this.stats.merge({
 			health,
 			maxHealth: health,
-			strength: Utils.Random.between(8, 10)
+			strength: Utils.Random.between(8, 10),
+			evasion: 10
 		});
 
 		this.graphics = new PIXI.Sprite(game.textures.skeleton);

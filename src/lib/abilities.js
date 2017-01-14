@@ -20,9 +20,16 @@ const Abilities = {
 						createjs.Tween.get(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
 							let baseDamage = 1 + creature.stats.strength / 4;
 
-							console.log(baseDamage * 0.85, baseDamage * 1.25);
+							let chanceToHit = creature.stats.accuracy / target.stats.evasion;
 
-							target.takeDamage(new Damage(Utils.Random.between(baseDamage * 0.85, baseDamage * 1.15)));
+							console.log(chanceToHit);
+
+							if (Utils.Random.roll(chanceToHit)) {
+								target.takeDamage(new Damage(Utils.Random.between(baseDamage * 0.85, baseDamage * 1.15)));
+							} else {
+								game.ui.battleText(target.cell, 'Miss!');
+							}
+
 							createjs.Tween.get(creature.graphics).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
 						});
 					});

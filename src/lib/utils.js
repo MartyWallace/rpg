@@ -25,6 +25,17 @@ const Utils = {
 			}
 
 			return null;
+		},
+
+		/**
+		 * Roll a number between 0 and 1 and return true if the provided number is less than it..
+		 * 
+		 * @param {Number} chance The percent chance to return true expressed as a decimal.
+		 * 
+		 * @return {Number}
+		 */
+		roll(chance) {
+			return Math.random() < chance;
 		}
 	},
 

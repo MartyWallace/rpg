@@ -97,8 +97,16 @@ class UI {
 	}
 
 	showDamage(creature, damage) {
-		let display = new PIXI.Text(Math.abs(damage.amount), { fill: damage.amount > 0 ? 0x000000 : 0x00CC00 });
-		display.position.set(creature.cell.x * game.world.scale + (game.world.scale / 2), creature.cell.y * game.world.scale + (game.world.scale / 2));
+		this.battleText(creature.cell, Math.abs(damage.amount).toString(), { fill: damage.amount > 0 ? 0x000000 : 0x00CC00 });
+	}
+
+	battleText(cell, body, style) {
+		if (typeof style === 'undefined') {
+			style = { fill: 0xFFFFFF };
+		}
+
+		let display = new PIXI.Text(body, style);
+		display.position.set(cell.x * game.world.scale + (game.world.scale / 2), cell.y * game.world.scale + (game.world.scale / 2));
 
 		game.world.layer('ui').addChild(display);
 
