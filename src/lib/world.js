@@ -96,13 +96,14 @@ class World extends EventEmitter {
 	}
 
 	convertMouseEventToCell(event) {
-		if (this.grid) {
-			return this.grid.find(
-				event.data.global.x - this.graphics.x,
-				event.data.global.y - this.graphics.y,
-				DRAW_SCALE
-			);
+		let x = event.data.global.x - this.graphics.x;
+		let y = event.data.global.y - this.graphics.y;
+
+		if (this.grid && this.grid.isWithin(x, y, DRAW_SCALE)) {
+			return this.grid.find(x, y, DRAW_SCALE);
 		}
+
+		return null;
 	}
 
 	handleClick(cell) {

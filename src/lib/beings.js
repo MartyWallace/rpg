@@ -270,7 +270,7 @@ class Skeleton extends Enemy {
 			health,
 			maxHealth: health,
 			strength: Utils.Random.between(8, 10),
-			evasion: 3,
+			evasion: 5,
 			accuracy: 5
 		});
 

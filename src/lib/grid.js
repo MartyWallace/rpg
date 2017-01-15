@@ -43,11 +43,18 @@ class Grid {
 		}
 	}
 
+	isWithin(x, y, scale = 1) {
+		x = Math.floor(x / scale);
+		y = Math.floor(y / scale);
+
+		return x >= 0 && y >= 0 && x < this.width && y < this.height;
+	}
+
 	find(x, y, scale = 1) {
 		x = Math.floor(x / scale);
 		y = Math.floor(y / scale);
 
-		if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
+		if (!this.isWithin(x, y)) {
 			console.warn('Trying to get an out of bounds cell (' + x + ', ' + y + ').');
 			return null;
 		}
