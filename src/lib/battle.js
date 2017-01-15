@@ -25,7 +25,9 @@ class Battle extends EventEmitter {
 		this.creatures = heroes.concat(enemies);
 		this.result = new BattleResult();
 
-		this.marker = new Utils.Graphics.rectangle(10, 10, 0xFF0000);
+		this.marker = new PIXI.Graphics();
+		this.marker.lineStyle(2, 0xFFFFFF);
+		this.marker.drawRect(-3, -3, game.world.scale + 6, game.world.scale + 6);
 
 		this.timeline = this.creatures.map(creature => {
 			return { creature, count: 0 };

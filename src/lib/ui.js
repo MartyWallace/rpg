@@ -134,7 +134,7 @@ class UI {
 		this.hideCreatureStatus();
 
 		this.creatureStatus = new CreatureStatus(creature);
-		this.creatureStatus.graphics.position.set(creature.cell.x * DRAW_SCALE, (creature.cell.y + 1) * DRAW_SCALE);
+		this.creatureStatus.graphics.position.set(creature.cell.x * game.world.scale, (creature.cell.y + 1) * game.world.scale);
 		
 		this.elements.push(this.creatureStatus);
 
@@ -232,10 +232,18 @@ class CreatureStatus extends UIElement {
 
 		this.name.x = this.hp.x = this.stats.x = 10;
 
+		let levelBox = Utils.Graphics.circle(12, 0x111111);
+		let levelText = new PIXI.Text(creature.stats.level.toString(), { fill: 0xCCCCCC, fontSize: 12, fontWeight: 'bold' });
+
+		levelBox.position.set(140, -5);
+		levelText.position.set(140 + ((levelBox.width - levelText.width) / 2), 0);
+
 		this.graphics.addChild(this.background);
 		this.graphics.addChild(this.name);
 		this.graphics.addChild(this.hp);
 		this.graphics.addChild(this.stats);
+		this.graphics.addChild(levelBox);
+		this.graphics.addChild(levelText);
 
 		this.bar = new Bar(140, 10, 0x252525, 0xFF0000);
 		this.bar.graphics.x = 10;
@@ -283,11 +291,11 @@ class VictoryScreen extends EventEmitter {
 		this.graphics.interactiveChildren = true;
 
 		this.curtain = Utils.Graphics.rectangle(game.width, game.height, 0x000000);
-		this.curtain.alpha = 0.3;
+		this.curtain.alpha = 0.6;
 
 		this.modal = new PIXI.Container();
 		
-		this.modalBackground = Utils.Graphics.rectangle(300, 400, 0x222222);
+		this.modalBackground = Utils.Graphics.rectangle(300, 400, 0x111111);
 		this.modal.addChild(this.modalBackground);
 
 		this.modal.position.set((game.width - 300) / 2, (game.height - 400) / 2);
