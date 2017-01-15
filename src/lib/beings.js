@@ -270,7 +270,8 @@ class Skeleton extends Enemy {
 			health,
 			maxHealth: health,
 			strength: Utils.Random.between(8, 10),
-			evasion: 10
+			evasion: 3,
+			accuracy: 5
 		});
 
 		this.graphics = new PIXI.Sprite(game.textures.skeleton);

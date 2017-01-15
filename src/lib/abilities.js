@@ -22,9 +22,7 @@ const Abilities = {
 
 							let chanceToHit = creature.stats.accuracy / target.stats.evasion;
 
-							console.log(chanceToHit);
-
-							if (Utils.Random.roll(chanceToHit)) {
+							if (Utils.Random.roll(BattleUtils.getHitChance(creature, target))) {
 								target.takeDamage(new Damage(Utils.Random.between(baseDamage * 0.85, baseDamage * 1.15)));
 							} else {
 								game.ui.battleText(target.cell, 'Miss!');
