@@ -25,7 +25,7 @@ const Abilities = {
 							if (Utils.Random.roll(BattleUtils.getHitChance(creature, target))) {
 								target.takeDamage(new Damage(Utils.Random.between(baseDamage * 0.85, baseDamage * 1.15)));
 							} else {
-								game.ui.battleText(target.cell, 'Miss!');
+								game.ui.worldText(target.cell, 'Miss!');
 							}
 
 							createjs.Tween.get(creature.graphics).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());

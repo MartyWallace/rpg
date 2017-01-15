@@ -97,20 +97,37 @@ class UI {
 	}
 
 	showDamage(creature, damage) {
-		this.battleText(creature.cell, Math.abs(damage.amount).toString(), { fill: damage.amount > 0 ? 0x000000 : 0x00CC00 });
+		this.worldText(creature.cell, Math.abs(damage.amount).toString(), damage.amount > 0 ? 0x000000 : 0x00CC00);
 	}
 
-	battleText(cell, body, style) {
-		if (typeof style === 'undefined') {
-			style = { fill: 0xFFFFFF };
-		}
+	/**
+	 * Show some in-world text at a specificed cell.
+	 * 
+	 * @param {Cell} cell The cell to position the text on.
+	 * @param {String} body The text body.
+	 * @param {Number} color The text color.
+	 * 
+	 * @return {Promise}
+	 */
+	worldText(cell, body, color) {
+		return new Promise((resolve, reject) => {
+			let display = new PIXI.Text(body, { fill: color ? color: 0xFFFFFF, stroke: 0x222222, strokeThickness: 2, fontSize: 16, align: 'center' });
 
-		let display = new PIXI.Text(body, style);
-		display.position.set(cell.x * game.world.scale + (game.world.scale / 2), cell.y * game.world.scale + (game.world.scale / 2));
+			let offset = game.world.scale / 3;
 
-		game.world.layer('ui').addChild(display);
+			let x = (cell.x * game.world.scale + ((game.world.scale - display.width) / 2)) + Utils.Random.between(-offset, offset);
+			let y = (cell.y * game.world.scale + ((game.world.scale - display.height) / 2)) + Utils.Random.between(-offset, offset);
 
-		setTimeout(() => display.parent.removeChild(display), 1000);
+			display.alpha = 0;
+			display.position.set(x, y - 20);
+
+			game.world.layer('ui').addChild(display);
+
+			createjs.Tween.get(display).to({ alpha: 1, y }, 250, createjs.Ease.bounceOut).wait(1000).to({ alpha: 0 }, 100).call(() => {
+				display.parent && display.parent.removeChild(display);
+				resolve();
+			});
+		});
 	}
 
 	showCreatureStatus(creature) {
@@ -204,17 +221,21 @@ class CreatureStatus extends UIElement {
 
 		this.creature = creature;
 
-		this.background = Utils.Graphics.rectangle(160, 80, 0x333333);
-		this.name = new PIXI.Text(creature.name, { fill: 0xFFFFFF, fontSize: 12 });
+		this.background = Utils.Graphics.rectangle(160, 95, 0x333333);
+		this.name = new PIXI.Text(creature.name, { fill: 0xFFFFFF, fontSize: 12, fontWeight: 'bold' });
 		this.name.y = 10;
 		this.hp = new PIXI.Text(creature.stats.health + '/' + creature.stats.maxHealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
 		this.hp.y = 30;
 
-		this.name.x = this.hp.x = 10;
+		this.stats = new PIXI.Text('STR: ' + creature.stats.strength + ' EVA: ' + creature.stats.evasion + ' ACC: ' + creature.stats.accuracy, { fill: 0xAAAAAA, fontSize: 10 });
+		this.stats.y = 70;
+
+		this.name.x = this.hp.x = this.stats.x = 10;
 
 		this.graphics.addChild(this.background);
 		this.graphics.addChild(this.name);
 		this.graphics.addChild(this.hp);
+		this.graphics.addChild(this.stats);
 
 		this.bar = new Bar(140, 10, 0x252525, 0xFF0000);
 		this.bar.graphics.x = 10;
