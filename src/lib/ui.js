@@ -249,7 +249,7 @@ class CreatureStatus extends UIElement {
 		this.background = Utils.Graphics.rectangle(160, 95, 0x333333);
 		this.name = new PIXI.Text(creature.name, { fill: 0xFFFFFF, fontSize: 12, fontWeight: 'bold' });
 		this.name.y = 10;
-		this.hp = new PIXI.Text(creature.stats.health + '/' + creature.stats.maxHealth + 'HP', { fill: 0xFFFFFF, fontSize: 12 });
+		this.hp = new PIXI.Text(this.hpText, { fill: 0xFFFFFF, fontSize: 12 });
 		this.hp.y = 30;
 
 		this.stats = new PIXI.Text('STR: ' + creature.stats.strength + ' EVA: ' + creature.stats.evasion + ' ACC: ' + creature.stats.accuracy, { fill: 0xAAAAAA, fontSize: 10 });
@@ -278,8 +278,13 @@ class CreatureStatus extends UIElement {
 	}
 
 	update() {
-		this.hp.text = this.creature.stats.health + '/' + this.creature.stats.maxHealth + 'HP';
+		this.hp.text = this.hpText;
 		this.bar.percentage = this.creature.healthPercentage;
+	}
+
+	get hpText() {
+		if (this.creature.dead) return 'DEAD';
+		return this.creature.stats.health + '/' + this.creature.stats.maxHealth + 'HP';
 	}
 }
 

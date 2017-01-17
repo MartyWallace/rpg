@@ -13,6 +13,7 @@ const Abilities = {
 			return {
 				name: 'Attack',
 				flow: Abilities.FLOW_CREATURE_TARGETED,
+				allowDeadTargets: false,
 				icon: '/textures/ability-icons/attack.png',
 
 				getDamageRange(creature) {
@@ -76,6 +77,7 @@ const Abilities = {
 			return {
 				name: 'Bandage',
 				flow: Abilities.FLOW_CREATURE_TARGETED,
+				allowDeadTargets: false,
 				icon: '/textures/ability-icons/bandage.png',
 
 				getHealRange(creature) {

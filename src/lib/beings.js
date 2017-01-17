@@ -223,12 +223,15 @@ class Hero extends Creature {
 					let interaction = cell => {
 						if (ability.flow === Abilities.FLOW_CREATURE_TARGETED) {
 							if (cell.content instanceof Creature) {
-								ability.behaviour(this, battle, cell.content).then(() => resolve());
+								if (!cell.content.dead || ability.allowDeadTargets) {
+									ability.behaviour(this, battle, cell.content).then(() => resolve());
 
-								game.world.off('interact', interaction);
+									game.world.off('interact', interaction);
+								} else {
+									console.warn('This ability cannot target dead creatures.');
+								}
 							} else {
-								// Need to target a creature.
-								// ...
+								console.warn('This ability must target a creature.');
 							}
 						} else if (ability.flow === Abilities.FLOW_CELL_TARGETED) {
 							ability.behaviour(this, battle, cell).then(() => resolve());
