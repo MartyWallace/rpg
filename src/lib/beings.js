@@ -34,7 +34,9 @@ class Stats {
 			level: this.level,
 			health: this.health,
 			maxHealth: this.maxHealth,
-			strength: this.strength
+			strength: this.strength,
+			evasion: this.evasion,
+			accuracy: this.accuracy
 		};
 	}
 
