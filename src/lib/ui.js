@@ -61,7 +61,7 @@ class UI {
 				btn.addChild(icon);
 				btn.addChild(text);
 
-				btn.y = 31 + index * 45;
+				btn.y = 31 + index * 40;
 
 				btn.interactive = true;
 				btn.buttonMode = true;

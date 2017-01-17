@@ -51,7 +51,7 @@ class World extends EventEmitter {
 		this.setState(this.STATE_IDLE);
 		this.party = null;
 		this.map = null;
-		this.nextBattle = 4;
+		this.nextBattle = 9;
 		this.battle = null;
 		this.lastHoverCell = null;
 
@@ -220,6 +220,10 @@ class World extends EventEmitter {
 
 					this.setState(this.STATE_IDLE);
 				});
+			});
+
+			this.battle.on('defeat', () => {
+				window.alert('Game Over.');
 			});
 
 			this.emit('startBattle', this.battle);

@@ -161,16 +161,20 @@ class Creature extends Being {
 	}
 
 	takeDamage(damage) {
-		game.ui.showDamage(this, damage);
+		if (!this.dead) {
+			game.ui.showDamage(this, damage);
 
-		this.stats.health -= damage.amount;
+			this.stats.health -= damage.amount;
 
-		this.stats.health = Math.max(0, this.stats.health);
-		this.stats.health = Math.min(this.stats.health, this.stats.maxHealth);
+			this.stats.health = Math.max(0, this.stats.health);
+			this.stats.health = Math.min(this.stats.health, this.stats.maxHealth);
 
-		if (this.stats.health <= 0) {
-			// This creature is dead.
-			this.die();
+			if (this.stats.health <= 0) {
+				// This creature is dead.
+				this.die();
+			}
+		} else {
+			console.warn('Dead creatures cannot take damage.');
 		}
 	}
 
@@ -182,8 +186,17 @@ class Creature extends Being {
 		this.emit('die');
 	}
 
+	revive() {
+		this.stats.health = 1;
+		this.emit('revive');
+	}
+
 	get healthPercentage() {
 		return this.stats.health / this.stats.maxHealth;
+	}
+
+	get dead() {
+		return this.stats.health <= 0;
 	}
 }
 
@@ -198,6 +211,9 @@ class Hero extends Creature {
 		this.name = def.data.name;
 
 		this.setCell(cell);
+
+		this.on('die', () => this.graphics.alpha = 0.4);
+		this.on('revive', () => this.graphics.alpha = 1);
 	}
 
 	action(battle) {
@@ -224,7 +240,6 @@ class Hero extends Creature {
 					game.world.on('interact', interaction);
 				} else if (ability.flow === Abilities.FLOW_UNTARGETED) {
 					// Instant ability.
-					console.log(ability);
 					ability.behaviour(this, battle).then(() => resolve());
 				} else {
 					console.warn('Unknown ability flow type: "' + ability.flow + '".');
@@ -265,7 +280,7 @@ class Skeleton extends Enemy {
 		this.stats.merge({
 			health,
 			maxHealth: health,
-			strength: Utils.Random.between(8, 10),
+			strength: Utils.Random.between(15, 20),
 			evasion: 10,
 			accuracy: 16,
 			level: 1
@@ -278,11 +293,16 @@ class Skeleton extends Enemy {
 
 	action(battle) {
 		return new Promise(resolve => {
-			let target = battle.randomHero();
+			let target = battle.randomAliveHero();
 
-			setTimeout(() => {
-				Abilities.find('attack').behaviour(this, battle, target).then(() => resolve());
-			}, 200);
+			if (target) {
+				setTimeout(() => {
+					Abilities.find('attack').behaviour(this, battle, target).then(() => resolve());
+				}, 200);
+			} else {
+				// Couldn't find a target, all heroes likely dead.
+				// ...
+			}
 		});
 	}
 }

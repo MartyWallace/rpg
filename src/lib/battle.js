@@ -65,6 +65,11 @@ class Battle extends EventEmitter {
 		if (this.timeline.length > 0) {
 			while (true) {
 				for (let entity of this.timeline) {
+					if (entity.creature.dead) {
+						// Dead creatures cannot take turns.
+						continue;
+					}
+
 					entity.count += entity.creature.wait;
 
 					if (entity.count >= 100) {
@@ -83,7 +88,7 @@ class Battle extends EventEmitter {
 		this.marker.parent && game.world.layer('ui').removeChild(this.marker);
 
 		if (this.enemies.length === 0) this.victory();
-		else if (this.heroes.length === 0) this.defeat();
+		else if (this.heroes.reduce((total, hero) => total + (hero.dead ? 1 : 0), 0) >= this.heroes.length) this.defeat();
 		else {
 			let next = this.next();
 			
@@ -105,7 +110,7 @@ class Battle extends EventEmitter {
 	}
 
 	defeat() {
-		this.emit('defeat');
+		this.emit('defeat', this.result);
 		this.cleanup();
 	}
 
@@ -115,6 +120,10 @@ class Battle extends EventEmitter {
 
 	randomHero() {
 		return Utils.Random.fromArray(this.heroes);
+	}
+
+	randomAliveHero() {
+		return Utils.Random.fromArray(this.heroes.filter(hero => !hero.dead));
 	}
 
 	cleanup() {
