@@ -30,9 +30,7 @@ const Abilities = {
 							} else {
 								game.ui.worldText(target.cell, 'Miss!');
 							}
-
-							createjs.Tween.get(creature.graphics).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
-						});
+						}).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
 					});
 				},
 
