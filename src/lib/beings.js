@@ -1,9 +1,3 @@
-class Damage {
-	constructor(amount = 0) {
-		this.amount = Math.round(amount);
-	}
-}
-
 /**
  * Creature stats e.g. health, strength.
  */

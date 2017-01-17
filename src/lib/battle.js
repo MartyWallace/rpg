@@ -143,3 +143,9 @@ class BattleResult {
 		this.exp = 10;
 	}
 }
+
+class Damage {
+	constructor(amount = 0) {
+		this.amount = Math.round(amount);
+	}
+}

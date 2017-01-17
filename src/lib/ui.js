@@ -66,9 +66,34 @@ class UI {
 				btn.interactive = true;
 				btn.buttonMode = true;
 
+				let tip = null;
+
+				btn.on('mouseover', event => {
+					let tipLines = ability.tip(hero);
+
+					if (tipLines) {
+						tip = new Tip(tipLines);
+
+						tip.graphics.position.set(btn.x + btn.width + 10, btn.y);
+						menu.addChild(tip.graphics);
+					}
+				});
+
+				btn.on('mouseout', event => {
+					if (tip && tip.graphics.parent) {
+						tip.graphics.parent.removeChild(tip.graphics);
+						tip = null;
+					}
+				});
+
 				btn.on('click', event => {
 					resolve(ability);
 					menu.parent && menu.parent.removeChild(menu);
+
+					if (tip && tip.graphics.parent) {
+						tip.graphics.parent.removeChild(tip.graphics);
+						tip = null;
+					}
 				});
 
 				menu.addChild(btn);
@@ -329,4 +354,26 @@ class VictoryScreen extends EventEmitter {
 		this.modal.addChild(this.okButton);
 	}
 
+}
+
+class Tip {
+	constructor(lines, padding = 10, lineSpacing = 10) {
+		this.graphics = new PIXI.Container();
+
+		let widest = 0;
+		let y = 0;
+
+		lines.forEach(line => {
+			let text = new PIXI.Text(line.text, line.style);
+			widest = Math.max(widest, text.width);
+
+			this.graphics.addChild(text);
+			text.position.set(padding, padding + y);
+
+			y += text.height + lineSpacing;
+		});
+
+		let background = Utils.Graphics.rectangle(widest + (padding * 2), y + (padding * 2) - lineSpacing, 0x222222);
+		this.graphics.addChildAt(background, 0);
+	}
 }
