@@ -148,7 +148,7 @@ class UI {
 
 			game.world.layer('ui').addChild(display);
 
-			createjs.Tween.get(display).to({ alpha: 1, y }, 250, createjs.Ease.bounceOut).wait(1000).to({ alpha: 0 }, 100).call(() => {
+			Utils.Animation.tween(display).to({ alpha: 1, y }, 250, Utils.Animation.ease('bounceOut')).wait(1000).to({ alpha: 0 }, 100).call(() => {
 				display.parent && display.parent.removeChild(display);
 				resolve();
 			});
@@ -188,7 +188,7 @@ class UI {
 
 			this.graphics.addChild(screen);
 
-			createjs.Tween.get(screen).to({ alpha: 1 }, duration).call(resolve).to({ alpha: 0 }, duration).call(() => {
+			Utils.Animation.tween(screen).to({ alpha: 1 }, duration).call(resolve).to({ alpha: 0 }, duration).call(() => {
 				screen.parent && screen.parent.removeChild(screen);
 			});
 		});

@@ -366,7 +366,7 @@ class World extends EventEmitter {
 					targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
 				}
 
-				createjs.Tween.get(this.graphics).to({ x: targetX, y: targetY }, duration, createjs.Ease[ease]).call(() => {
+				Utils.Animation.tween(this.graphics).to({ x: targetX, y: targetY }, duration, Utils.Animation.ease(ease)).call(() => {
 					this.viewing = cell;
 					resolve(cell);
 				});

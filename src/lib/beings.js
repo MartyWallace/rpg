@@ -74,7 +74,7 @@ class Being extends EventEmitter {
 	moveToCell(cell, duration = 0) {
 		return new Promise((resolve, reject) => {
 			if (this.graphics) {
-				createjs.Tween.get(this.graphics).to({
+				Utils.Animation.tween(this.graphics).to({
 					x: cell.x * game.world.scale,
 					y: cell.y * game.world.scale
 				}, duration).call(() => resolve(cell));

@@ -39,6 +39,20 @@ const Utils = {
 		}
 	},
 
+	Animation: {
+		tween(target) {
+			return createjs.Tween.get(target);
+		},
+
+		ease(style) {
+			if (style in createjs.Ease) {
+				return createjs.Ease[style];
+			} else {
+				throw new Error('Ease style "' + style + '" does not exist.');
+			}
+		}
+	},
+
 	Graphics: {
 		rectangle(width, height, fill = 0x000000) {
 			let graphics = new PIXI.Graphics();

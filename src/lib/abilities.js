@@ -23,7 +23,7 @@ const Abilities = {
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
-						createjs.Tween.get(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+						Utils.Animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
 							if (Utils.Random.roll(BattleUtils.getHitChance(creature, target))) {
 								let range = this.getDamageRange(creature);
 								target.takeDamage(new Damage(Utils.Random.between(range.min, range.max)));
@@ -84,12 +84,10 @@ const Abilities = {
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
-						createjs.Tween.get(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+						Utils.Animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
 							let range = this.getHealRange(creature);
-							
 							target.takeDamage(new Damage(Utils.Random.between(range.max, range.min)));
-							createjs.Tween.get(creature.graphics).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
-						});
+						}).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
 					});
 				},
 
