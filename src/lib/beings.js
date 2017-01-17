@@ -214,6 +214,8 @@ class Hero extends Creature {
 
 		this.on('die', () => this.graphics.alpha = 0.4);
 		this.on('revive', () => this.graphics.alpha = 1);
+
+		if (this.stats.health <= 0) this.die();
 	}
 
 	action(battle) {
