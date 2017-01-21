@@ -215,12 +215,16 @@ class Hero extends Creature {
 		this.wait = 5;
 		this.stats.merge(def.data.stats);
 
-		this.levelling = {
-			exp: 0,
-			nextLevel: 10,
-			abilityPoints: 0,
-			statPoints: 0
-		};
+		if (def.data.levelling) {
+			this.levelling = def.data.levelling;
+		} else {
+			this.levelling = {
+				exp: 0,
+				nextLevel: 10,
+				abilityPoints: 0,
+				statPoints: 0
+			};
+		}
 
 		this.graphics = new PIXI.Sprite(game.textures.hero1);
 		this.name = def.data.name;
@@ -304,6 +308,7 @@ class Hero extends Creature {
 		return {
 			name: this.def.data.name,
 			stats: this.stats.save(),
+			levelling: this.levelling,
 			attrs: this.def.data.attrs,
 			abilities: this.def.data.abilities
 		};
