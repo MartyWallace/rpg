@@ -51,7 +51,7 @@ class World extends EventEmitter {
 		this.setState(this.STATE_IDLE);
 		this.party = null;
 		this.map = null;
-		this.nextBattle = 9;
+		this.nextBattle = 3;
 		this.battle = null;
 		this.lastHoverCell = null;
 

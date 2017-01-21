@@ -122,7 +122,38 @@ class UI {
 	}
 
 	showDamage(creature, damage) {
-		this.worldText(creature.cell, Math.abs(damage.amount).toString(), damage.amount > 0 ? 0x000000 : 0x00CC00);
+		return new Promise((resolve, reject) => {
+			let barWidth = 50;
+			let diffP = Utils.Math.clamp(damage.absolute / creature.stats.maxHealth, 0, 1);
+
+			if (damage.isHealing()) {
+				// Limit the percentage change to be the missing HP for healing.
+				diffP = Math.min(diffP, 1 - (creature.stats.health / creature.stats.maxHealth));
+			}
+
+			let bar = new PIXI.Container();
+			let base = new Bar(barWidth, 8, 0x000000, 0xCC0000);
+
+			base.percentage = (creature.stats.health - damage.amount) / creature.stats.maxHealth;
+
+			let diff = Utils.Graphics.rectangle(diffP * barWidth, 8, damage.isHealing() ? 0x00CC00 : 0x710000);
+
+			if (damage.isHealing()) diff.pivot.x = diffP * barWidth;
+			
+			diff.x = base.foreground.width;
+
+			bar.position.set(creature.cell.x * game.world.scale + ((game.world.scale - base.graphics.width) / 2), creature.cell.y * game.world.scale + game.world.scale - 15);
+			bar.addChild(base.graphics);
+			bar.addChild(diff);
+
+			game.world.layer('ui').addChild(bar);
+
+			Utils.Animation.tween(diff).wait(300).to({ width: 0 }, 500, Utils.Animation.ease('sineInOut')).wait(500).call(() => bar.parent && bar.parent.removeChild(bar));
+
+			this.worldText(creature.cell, damage.absolute.toString(), damage.isHealing() ? 0x00CC00 : 0xFFFFFF).then(() => {
+				resolve();
+			});
+		});
 	}
 
 	/**

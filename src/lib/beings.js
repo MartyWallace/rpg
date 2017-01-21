@@ -163,7 +163,7 @@ class Creature extends Being {
 	takeDamage(damage) {
 		if (!this.dead) {
 			game.ui.showDamage(this, damage);
-
+			
 			this.stats.health -= damage.amount;
 
 			this.stats.health = Math.max(0, this.stats.health);
