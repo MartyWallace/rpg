@@ -214,7 +214,7 @@ class World extends EventEmitter {
 			this.battle.start();
 
 			this.battle.on('victory', result => {
-				game.ui.showVictoryScreen(result).then(() => {
+				game.ui.showVictoryScreen(result, this.party.heroes).then(() => {
 					this.view(this.party.leader.cell, 300);
 					this.battle = null;
 

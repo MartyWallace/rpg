@@ -6,6 +6,8 @@ class Stats {
 		this.level = 1;
 		this.health = 1;
 		this.maxHealth = 1;
+		this.energy = 1;
+		this.maxEnergy = 1;
 		this.strength = 1;
 		this.evasion = 1;
 		this.accuracy = 1; // TODO: Probably rename this later.
@@ -28,6 +30,8 @@ class Stats {
 			level: this.level,
 			health: this.health,
 			maxHealth: this.maxHealth,
+			energy: this.energy,
+			maxEnergy: this.maxEnergy,
 			strength: this.strength,
 			evasion: this.evasion,
 			accuracy: this.accuracy
@@ -163,7 +167,7 @@ class Creature extends Being {
 	takeDamage(damage) {
 		if (!this.dead) {
 			game.ui.showDamage(this, damage);
-			
+
 			this.stats.health -= damage.amount;
 
 			this.stats.health = Math.max(0, this.stats.health);
@@ -195,6 +199,10 @@ class Creature extends Being {
 		return this.stats.health / this.stats.maxHealth;
 	}
 
+	get energyPercentage() {
+		return this.stats.energy / this.stats.maxEnergy;
+	}
+
 	get dead() {
 		return this.stats.health <= 0;
 	}
@@ -207,6 +215,13 @@ class Hero extends Creature {
 		this.wait = 5;
 		this.stats.merge(def.data.stats);
 
+		this.levelling = {
+			exp: 0,
+			nextLevel: 10,
+			abilityPoints: 0,
+			statPoints: 0
+		};
+
 		this.graphics = new PIXI.Sprite(game.textures.hero1);
 		this.name = def.data.name;
 
@@ -216,6 +231,38 @@ class Hero extends Creature {
 		this.on('revive', () => this.graphics.alpha = 1);
 
 		if (this.stats.health <= 0) this.die();
+	}
+
+	/**
+	 * Add EXP to this hero. Returns the amount of levels advanced.
+	 * 
+	 * @returns {Number}
+	 */
+	addExp(amount) {
+		let levels = 0;
+
+		while (amount > 0) {
+			this.levelling.exp += 1;
+
+			if (this.levelling.exp >= this.levelling.nextLevel) {
+				this.levelUp();
+
+				this.levelling.exp = 0;
+				this.levelling.nextLevel = Math.round(this.levelling.nextLevel * 1.25);
+
+				levels += 1;
+			}
+
+			amount -= 1;
+		}
+
+		return levels;
+	}
+
+	levelUp() {
+		this.stats.level += 1;
+		this.levelling.abilityPoints += 1;
+		this.levelling.statPoints += 2;
 	}
 
 	action(battle) {

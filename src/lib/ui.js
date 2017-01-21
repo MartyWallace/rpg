@@ -111,7 +111,7 @@ class UI {
 		party.heroes.forEach((hero, index) => {
 			let status = new HeroStatus(hero);
 
-			status.graphics.x = 20 + (index * 125);
+			status.graphics.x = 20 + (index * 160);
 			status.graphics.y = 20;
 
 			this.graphics.addChild(status.graphics);
@@ -197,9 +197,9 @@ class UI {
 		game.world.layer('ui').addChild(this.creatureStatus.graphics);
 	}
 
-	showVictoryScreen(result) {
+	showVictoryScreen(result, heroes) {
 		return new Promise((resolve, reject) => {
-			let screen = new VictoryScreen(result);
+			let screen = new VictoryScreen(result, heroes);
 
 			this.graphics.addChild(screen.graphics);
 
@@ -245,30 +245,47 @@ class HeroStatus extends UIElement {
 	constructor(hero) {
 		super();
 
-		this.background = Utils.Graphics.rectangle(120, 70, 0x222222);
+		this.hero = hero;
+
+		this.background = Utils.Graphics.rectangle(155, 70, 0x222222);
 		this.name = new PIXI.Text(hero.def.data.name, { fill: 0xFFFFFF, fontSize: 12 });
 		this.name.x = this.name.y = 10;
 
-		this.hp = new PIXI.Text(hero.stats.health + '/' + hero.stats.maxHealth + 'HP', { fill: 0xFFFFFF, fontSize: 11 });
+		this.hp = new PIXI.Text(this.hpText, { fill: 0x999999, fontSize: 11 });
 		this.hp.x = 10;
-		this.hp.y = 30;
+		this.hp.y = 34;
 
-		this.bar = new Bar(100, 10, 0x000000, 0xCC0000);
+		this.ep = new PIXI.Text(this.epText, { fill: 0x999999, fontSize: 11 });
+		this.ep.x = 95;
+		this.ep.y = 34;
+
+		this.bar = new Bar(80, 8, 0x000000, 0xCC0000);
 		this.bar.graphics.x = 10;
-		this.bar.graphics.y = 50;
+		this.bar.graphics.y = 52;
+
+		this.energyBar = new Bar(50, 8, 0x000000, 0x1352A2);
+		this.energyBar.graphics.x = 95;
+		this.energyBar.graphics.y = 52;
 
 		this.graphics.addChild(this.background);
 		this.graphics.addChild(this.name);
 		this.graphics.addChild(this.hp);
+		this.graphics.addChild(this.ep);
+		this.graphics.addChild(this.energyBar.graphics);
 		this.graphics.addChild(this.bar.graphics);
 
 		this.hero = hero;
 	}
 
 	update() {
-		this.hp.text = this.hero.stats.health + '/' + this.hero.stats.maxHealth + 'HP';
+		this.hp.text = this.hpText;
+		this.ep.text = this.epText;
 		this.bar.percentage = this.hero.healthPercentage;
+		this.energyBar.percentage = this.hero.energyPercentage;
 	}
+
+	get hpText() { return this.hero.stats.health + '/' + this.hero.stats.maxHealth + 'HP'; }
+	get epText() { return this.hero.stats.energy + '/' + this.hero.stats.maxEnergy + 'EP'; }
 }
 
 class CreatureStatus extends UIElement {
@@ -343,7 +360,7 @@ class Bar {
 }
 
 class VictoryScreen extends EventEmitter {
-	constructor(result) {
+	constructor(result, heroes) {
 		super();
 
 		this.result = result;
@@ -375,6 +392,37 @@ class VictoryScreen extends EventEmitter {
 		let text = new PIXI.Text('Victory! Earned ' + result.exp + ' EXP.', { fill: 0xFFFFFF, fontSize: 16 });
 		text.position.set(20, 20);
 		this.modal.addChild(text);
+
+		let barY = 100;
+
+		heroes.forEach(hero => {
+			let text = new PIXI.Text(hero.name + ' - Level ' + hero.stats.level, { fontSize: 12, fill: 0xEEEEEE });
+			let bar = new Bar(260, 12, 0x444444, 0xEEEEEE);
+
+			text.position.set(20, barY - 20);
+			bar.graphics.position.set(20, barY);
+			bar.percentage = hero.levelling.exp / hero.levelling.nextLevel;
+
+			this.modal.addChild(bar.graphics);
+			this.modal.addChild(text);
+
+			barY += 50;
+
+			if (!hero.dead) {
+				let levelsAdvanced = hero.addExp(result.exp);
+
+				if (levelsAdvanced > 0) {
+					Utils.Animation.tween(bar).to({ percentage: 1 }, 1000, Utils.Animation.ease('sineInOut')).wait(200).call(() => {
+						text.text = hero.name + ' - Level ' + hero.stats.level;
+						bar.percentage = 0;
+
+						Utils.Animation.tween(bar).to({ percentage: hero.levelling.exp / hero.levelling.nextLevel }, 1000, Utils.Animation.ease('sineInOut'));
+					});
+				} else {
+					Utils.Animation.tween(bar).to({ percentage: hero.levelling.exp / hero.levelling.nextLevel }, 1000, Utils.Animation.ease('sineInOut'));
+				}
+			}
+		});
 
 		this.okButton.addChild(okText);
 

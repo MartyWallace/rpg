@@ -1,6 +1,6 @@
 const DRAW_SCALE = 60;
-const GAME_WIDTH = 16 * DRAW_SCALE;
-const GAME_HEIGHT = 12 * DRAW_SCALE;
+const GAME_WIDTH = 18 * DRAW_SCALE;
+const GAME_HEIGHT = 14 * DRAW_SCALE;
 
 const LEVELS = [{
 	width: 30,

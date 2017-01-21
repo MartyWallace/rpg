@@ -21,7 +21,8 @@ class Grid {
 
 		for (let x = 0; x < this.width; x++ ) {
 			for (let y = 0; y < this.height; y++) {
-				let box = Utils.Graphics.rectangle(scale, scale, light ? 0x666666 : 0x606060);
+				//let box = Utils.Graphics.rectangle(scale, scale, light ? 0x666666 : 0x606060);
+				let box = PIXI.Sprite.fromImage('/textures/' + (light ? 'ground-light' : 'ground') + '.png');
 				box.position.set(x * scale, y * scale);
 
 				watermark.addChild(box);
