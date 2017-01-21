@@ -226,7 +226,10 @@ class Hero extends Creature {
 			};
 		}
 
-		this.graphics = new PIXI.Sprite(game.textures.hero1);
+		this.graphics = PIXI.Sprite.fromImage(def.data.attrs.texture);
+		this.graphics.width = 80;
+		this.graphics.height = 80;
+
 		this.name = def.data.name;
 
 		this.setCell(cell);
@@ -344,6 +347,8 @@ class Skeleton extends Enemy {
 		});
 
 		this.graphics = new PIXI.Sprite(game.textures.skeleton);
+		this.graphics.width = game.world.scale;
+		this.graphics.height = game.world.scale;
 
 		this.setCell(cell);
 	}

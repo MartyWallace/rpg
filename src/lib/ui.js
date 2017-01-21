@@ -167,7 +167,7 @@ class UI {
 	 */
 	worldText(cell, body, color) {
 		return new Promise((resolve, reject) => {
-			let display = new PIXI.Text(body, { fill: color ? color: 0xFFFFFF, stroke: 0x222222, strokeThickness: 2, fontSize: 16, align: 'center' });
+			let display = new PIXI.Text(body, { fill: color ? color: 0xFFFFFF, stroke: 0x222222, strokeThickness: 2, fontSize: 19, fontFamily: 'Averia Serif Libre', align: 'center' });
 
 			let offset = game.world.scale / 3;
 
