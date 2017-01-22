@@ -3,7 +3,9 @@ const stage = new PIXI.Container();
 
 const renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT, {
 	view: canvas,
-	backgroundColor: 0x000000
+	backgroundColor: 0x000000,
+	resolution: 1,
+	antialiasing: true
 });
 
 class Game {
