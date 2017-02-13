@@ -33,14 +33,14 @@ export default {
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
-						animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+						animation.tween(creature.graphics).to(creature.calculateGraphicsPosition(target.cell), 200).call(() => {
 							if (random.roll(battleUtils.getHitChance(creature, target))) {
 								let range = this.getDamageRange(creature);
 								target.takeDamage(new Damage(random.between(range.min, range.max)));
 							} else {
 								game.ui.worldText(target.cell, 'Miss!');
 							}
-						}).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
+						}).to(creature.calculateGraphicsPosition(creature.cell), 200).call(() => resolve());
 					});
 				},
 
@@ -94,10 +94,10 @@ export default {
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
-						animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+						animation.tween(creature.graphics).to(creature.calculateGraphicsPosition(target.cell), 200).call(() => {
 							let range = this.getHealRange(creature);
 							target.takeDamage(new Damage(random.between(range.max, range.min)));
-						}).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
+						}).to(creature.calculateGraphicsPosition(creature.cell), 200).call(() => resolve());
 					});
 				},
 

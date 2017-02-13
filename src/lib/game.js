@@ -1,5 +1,6 @@
 import config from '../config';
 import library from './library';
+import storage from './utils/storage';
 import World from './world/world';
 import UI from './ui/ui';
 
@@ -31,11 +32,11 @@ export default {
 				
 				world.load(config.LEVELS[1], {
 					x: 1, y: 3,
-					heroes: [
+					heroes: storage.load('heroes', [
 						{ name: 'Marty', attrs: { color: 0xFFFFFF, texture: '/textures/hero1.png' }, stats: { health: 36, maxHealth: 36, strength: 50, evasion: 9, accuracy: 20 }, abilities: ['attack', 'skip'] },
 						{ name: 'Carlie', attrs: { color: 0xFFFFFF, texture: '/textures/hero1.png' }, stats: { health: 27, maxHealth: 27, strength: 50, evasion: 9, accuracy: 24 }, abilities: ['attack', 'bandage', 'skip',] },
 						{ name: 'Mia', attrs: { color: 0xFFFFFF, texture: '/textures/hero1.png' }, stats: { health: 21, maxHealth: 21, strength: 50, evasion: 12, accuracy: 19 }, abilities: ['attack', 'skip'] }
-					]
+					])
 				});
 
 				this.update();

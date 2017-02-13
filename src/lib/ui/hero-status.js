@@ -1,6 +1,7 @@
 import game from '../game';
 import graphics from '../utils/graphics';
 import UIElement from './ui-element';
+import HeroMenu from './hero-menu';
 import Bar from './bar';
 
 export default class HeroStatus extends UIElement {

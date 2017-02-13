@@ -1,7 +1,8 @@
+import game from '../game';
 import UIElement from './ui-element';
 import graphics from '../utils/graphics';
 
-class HeroMenu extends UIElement {
+export default class HeroMenu extends UIElement {
 	constructor(hero) {
 		super();
 

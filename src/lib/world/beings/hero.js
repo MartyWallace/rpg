@@ -21,6 +21,7 @@ export default class Hero extends Creature {
 		}
 
 		this.graphics = PIXI.Sprite.fromImage(def.data.attrs.texture);
+		this.graphics.pivot.set(18, 22);
 
 		this.name = def.data.name;
 
@@ -62,6 +63,11 @@ export default class Hero extends Creature {
 		this.stats.level += 1;
 		this.levelling.abilityPoints += 1;
 		this.levelling.statPoints += 2;
+	}
+
+	update() {
+		// TODO: Face mouse.
+		// ...
 	}
 
 	action(battle) {

@@ -16,10 +16,28 @@ export class Being extends EventEmitter {
 		this.layer = 'terrain';
 	}
 
+	/**
+	 * Calculate valid placement of this Being's graphics.
+	 * 
+	 * @param {Cell} cell The cell that the graphcis are moving to.
+	 * 
+	 * @return {Object}
+	 */
+	calculateGraphicsPosition(cell) {
+		let result = { x: 0, y: 0 };
+
+		if (this.graphics) {
+			result.x = cell.x * game.world.scale + (game.world.scale - this.graphics.width) / 2 + this.graphics.pivot.x;
+			result.y = cell.y * game.world.scale + (game.world.scale - this.graphics.height) / 2 + this.graphics.pivot.y;
+		}
+
+		return result;
+	}
+
 	setCell(cell) {
 		if (this.graphics) {
-			this.graphics.x = cell.x * game.world.scale;
-			this.graphics.y = cell.y * game.world.scale;
+			const pos = this.calculateGraphicsPosition(cell);
+			this.graphics.position.set(pos.x, pos.y);
 		}
 
 		this.prevCell = this.cell;
@@ -37,10 +55,7 @@ export class Being extends EventEmitter {
 	moveToCell(cell, duration = 0) {
 		return new Promise((resolve, reject) => {
 			if (this.graphics) {
-				animation.tween(this.graphics).to({
-					x: cell.x * game.world.scale,
-					y: cell.y * game.world.scale
-				}, duration).call(() => resolve(cell));
+				animation.tween(this.graphics).to(this.calculateGraphicsPosition(cell), duration).call(() => resolve(cell));
 			}
 
 			this.prevCell = this.cell;

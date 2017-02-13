@@ -22,8 +22,6 @@ export default class Skeleton extends Enemy {
 		});
 
 		this.graphics = new PIXI.Sprite.fromImage('/textures/skeleton.png');
-		this.graphics.width = game.world.scale;
-		this.graphics.height = game.world.scale;
 
 		this.setCell(cell);
 	}
