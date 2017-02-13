@@ -192,7 +192,7 @@ export default class World extends EventEmitter {
 				enemies.push(enemy);
 			}
 
-			this.battle = new Battle(this, this.party.heroes, enemies);
+			this.battle = new Battle(this.party.heroes, enemies);
 			this.battle.start();
 
 			this.battle.on('victory', result => {

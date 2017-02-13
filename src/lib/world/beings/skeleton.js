@@ -21,7 +21,7 @@ export default class Skeleton extends Enemy {
 			level: 1
 		});
 
-		this.graphics = new PIXI.Sprite(game.textures.skeleton);
+		this.graphics = new PIXI.Sprite.fromImage('/textures/skeleton.png');
 		this.graphics.width = game.world.scale;
 		this.graphics.height = game.world.scale;
 

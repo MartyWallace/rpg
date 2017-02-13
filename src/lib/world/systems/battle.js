@@ -2,15 +2,13 @@ import game from '../../game';
 import random from '../../utils/random';
 
 export default class Battle extends EventEmitter {
-	// TODO: Remove world parameter.
-	constructor(world, heroes, enemies) {
+	constructor(heroes, enemies) {
 		super();
 
 		this.heroes = heroes;
 		this.enemies = enemies;
 		this.creatures = heroes.concat(enemies);
 		this.result = new BattleResult();
-
 		this.marker = new PIXI.Graphics();
 		this.marker.lineStyle(2, 0xFFFFFF);
 		this.marker.drawRect(-3, -3, game.world.scale + 6, game.world.scale + 6);
