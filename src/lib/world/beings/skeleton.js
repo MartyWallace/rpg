@@ -9,17 +9,16 @@ export default class Skeleton extends Enemy {
 
 		this.wait = 6;
 		this.name = 'Skeleton';
-
-		let health = random.between(8, 12);
 		
 		this.stats.merge({
-			health,
-			maxHealth: health,
+			vitality: 12,
 			strength: random.between(15, 20),
 			evasion: 10,
 			accuracy: 16,
-			level: 1
+			level: 4
 		});
+
+		this.stats.refill();
 
 		this.graphics = new PIXI.Sprite.fromImage('/textures/skeleton.png');
 

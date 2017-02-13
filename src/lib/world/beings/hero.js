@@ -8,6 +8,7 @@ export default class Hero extends Creature {
 
 		this.wait = 5;
 		this.stats.merge(def.data.stats);
+		this.stats.refill();
 
 		if (def.data.levelling) {
 			this.levelling = def.data.levelling;
