@@ -1,25 +1,11 @@
-const BattleUtils = {
-	/**
-	 * Calculate hit chance between 0.1 and 1.0.
-	 * 
-	 * @param {Creature} sender The creature attempting to hit something.
-	 * @param {Creature} receiver The creature being hit.
-	 * 
-	 * @return {Number}
-	 */
-	getHitChance(sender, receiver) {
-		// The percentage difference between half the sender's accuracy and the receiver's total
-		// evason. This gives a 50% chance for matching accuracy and evasion and a 100% chance for
-		// anything equal to or over double accuracy.
-		return Utils.Math.clamp((sender.stats.accuracy / 2) / receiver.stats.evasion, 0.1, 1.0);
-	}
-};
+import game from '../../game';
+import random from '../../utils/random';
 
-class Battle extends EventEmitter {
+export default class Battle extends EventEmitter {
+	// TODO: Remove world parameter.
 	constructor(world, heroes, enemies) {
 		super();
 
-		this.world = world;
 		this.heroes = heroes;
 		this.enemies = enemies;
 		this.creatures = heroes.concat(enemies);
@@ -38,14 +24,14 @@ class Battle extends EventEmitter {
 				this.removeEnemy(enemy);
 
 				if (this.enemies.length > 0) {
-					this.world.view(this.getCenter(), 300);
+					game.world.view(this.getCenter(), 300);
 				}
 			});
 		});
 	}
 
 	removeEnemy(enemy) {
-		this.world.destroy(enemy);
+		game.world.destroy(enemy);
 
 		this.enemies.splice(this.enemies.indexOf(enemy), 1);
 		this.creatures.splice(this.creatures.indexOf(enemy), 1);
@@ -58,7 +44,7 @@ class Battle extends EventEmitter {
 	}
 
 	start() {
-		this.world.view(this.getCenter(), 300).then(cell => this.action());
+		game.world.view(this.getCenter(), 300).then(cell => this.action());
 	}
 
 	next() {
@@ -115,15 +101,15 @@ class Battle extends EventEmitter {
 	}
 
 	randomEnemy() {
-		return Utils.Random.fromArray(this.enemies);
+		return random.fromArray(this.enemies);
 	}
 
 	randomHero() {
-		return Utils.Random.fromArray(this.heroes);
+		return random.fromArray(this.heroes);
 	}
 
 	randomAliveHero() {
-		return Utils.Random.fromArray(this.heroes.filter(hero => !hero.dead));
+		return random.fromArray(this.heroes.filter(hero => !hero.dead));
 	}
 
 	cleanup() {
@@ -143,24 +129,12 @@ class Battle extends EventEmitter {
 			if (highY === null || creature.cell.y > highY) highY = creature.cell.y;
 		});
 
-		return this.world.grid.find(lowX + ((highX - lowX) / 2), lowY + ((highY - lowY) / 2));
+		return game.world.grid.find(lowX + ((highX - lowX) / 2), lowY + ((highY - lowY) / 2));
 	}
 }
 
-class BattleResult {
+export class BattleResult {
 	constructor() {
 		this.exp = 10;
 	}
-}
-
-class Damage {
-	constructor(amount = 0) {
-		this.amount = Math.round(amount);
-	}
-
-	isHealing() {
-		return this.amount < 0;
-	}
-
-	get absolute() { return Math.abs(this.amount); }
 }

@@ -1,4 +1,11 @@
-class UI {
+import game from '../game';
+import graphics from '../utils/graphics';
+import random from '../utils/random';
+import animation from '../utils/animation';
+import math from '../utils/math';
+import abilities from '../world/systems/abilities';
+
+export default class UI {
 	constructor() {
 		this.graphics = new PIXI.Container();
 		this.elements = [];
@@ -29,7 +36,7 @@ class UI {
 
 			menu.position.set(20, 110);
 
-			let nameBox = Utils.Graphics.rectangle(160, 26, 0x333333);
+			let nameBox = graphics.rectangle(160, 26, 0x333333);
 			let nameText = new PIXI.Text(hero.name, { fill: 0xEEEEEE, fontSize: 12 });
 
 			nameText.position.set(5, 5);
@@ -38,14 +45,14 @@ class UI {
 			menu.addChild(nameText);
 
 			hero.abilities.forEach((type, index) => {
-				let ability = Abilities.find(type);
+				let ability = abilities.find(type);
 
 				let btn = new PIXI.Container();
-				let back = Utils.Graphics.rectangle(160, 40, 0x222222);
+				let back = graphics.rectangle(160, 40, 0x222222);
 				let text = new PIXI.Text(ability.name, { fill: 0xDDDDDD, fontSize: 12 });
 				let icon = new PIXI.Container();
 
-				let iconBack = Utils.Graphics.rectangle(30, 30, 0x111111);
+				let iconBack = graphics.rectangle(30, 30, 0x111111);
 				icon.addChild(iconBack);
 
 				if (ability.icon) {
@@ -124,7 +131,7 @@ class UI {
 	showDamage(creature, damage) {
 		return new Promise((resolve, reject) => {
 			let barWidth = 50;
-			let diffP = Utils.Math.clamp(damage.absolute / creature.stats.maxHealth, 0, 1);
+			let diffP = math.clamp(damage.absolute / creature.stats.maxHealth, 0, 1);
 
 			if (damage.isHealing()) {
 				// Limit the percentage change to be the missing HP for healing.
@@ -136,7 +143,7 @@ class UI {
 
 			base.percentage = (creature.stats.health - damage.amount) / creature.stats.maxHealth;
 
-			let diff = Utils.Graphics.rectangle(diffP * barWidth, 8, damage.isHealing() ? 0x00CC00 : 0x710000);
+			let diff = graphics.rectangle(diffP * barWidth, 8, damage.isHealing() ? 0x00CC00 : 0x710000);
 
 			if (damage.isHealing()) diff.pivot.x = diffP * barWidth;
 			
@@ -148,7 +155,7 @@ class UI {
 
 			game.world.layer('ui').addChild(bar);
 
-			Utils.Animation.tween(diff).wait(300).to({ width: 0 }, 500, Utils.Animation.ease('sineInOut')).wait(500).call(() => bar.parent && bar.parent.removeChild(bar));
+			animation.tween(diff).wait(300).to({ width: 0 }, 500, animation.ease('sineInOut')).wait(500).call(() => bar.parent && bar.parent.removeChild(bar));
 
 			this.worldText(creature.cell, damage.absolute.toString(), damage.isHealing() ? 0x00CC00 : 0xFFFFFF).then(() => {
 				resolve();
@@ -171,15 +178,15 @@ class UI {
 
 			let offset = game.world.scale / 3;
 
-			let x = (cell.x * game.world.scale + ((game.world.scale - display.width) / 2)) + Utils.Random.between(-offset, offset);
-			let y = (cell.y * game.world.scale + ((game.world.scale - display.height) / 2)) + Utils.Random.between(-offset, offset);
+			let x = (cell.x * game.world.scale + ((game.world.scale - display.width) / 2)) + random.between(-offset, offset);
+			let y = (cell.y * game.world.scale + ((game.world.scale - display.height) / 2)) + random.between(-offset, offset);
 
 			display.alpha = 0;
 			display.position.set(x, y - 20);
 
 			game.world.layer('ui').addChild(display);
 
-			Utils.Animation.tween(display).to({ alpha: 1, y }, 250, Utils.Animation.ease('bounceOut')).wait(1000).to({ alpha: 0 }, 100).call(() => {
+			animation.tween(display).to({ alpha: 1, y }, 250, animation.ease('bounceOut')).wait(1000).to({ alpha: 0 }, 100).call(() => {
 				display.parent && display.parent.removeChild(display);
 				resolve();
 			});
@@ -213,13 +220,13 @@ class UI {
 
 	transition(duration) {
 		return new Promise((resolve, reject) => {
-			let screen = Utils.Graphics.rectangle(game.width, game.height, 0x000000);
+			let screen = graphics.rectangle(game.width, game.height, 0x000000);
 
 			screen.alpha = 0;
 
 			this.graphics.addChild(screen);
 
-			Utils.Animation.tween(screen).to({ alpha: 1 }, duration).call(resolve).to({ alpha: 0 }, duration).call(() => {
+			animation.tween(screen).to({ alpha: 1 }, duration).call(resolve).to({ alpha: 0 }, duration).call(() => {
 				screen.parent && screen.parent.removeChild(screen);
 			});
 		});
@@ -247,7 +254,7 @@ class HeroStatus extends UIElement {
 
 		this.hero = hero;
 
-		this.background = Utils.Graphics.rectangle(155, 70, 0x222222);
+		this.background = graphics.rectangle(155, 70, 0x222222);
 		this.name = new PIXI.Text(hero.def.data.name, { fill: 0xFFFFFF, fontSize: 12 });
 		this.name.x = this.name.y = 10;
 
@@ -306,7 +313,7 @@ class CreatureStatus extends UIElement {
 
 		this.creature = creature;
 
-		this.background = Utils.Graphics.rectangle(160, 95, 0x333333);
+		this.background = graphics.rectangle(160, 95, 0x333333);
 		this.name = new PIXI.Text(creature.name, { fill: 0xFFFFFF, fontSize: 12, fontWeight: 'bold' });
 		this.name.y = 10;
 		this.hp = new PIXI.Text(this.hpText, { fill: 0xFFFFFF, fontSize: 12 });
@@ -317,7 +324,7 @@ class CreatureStatus extends UIElement {
 
 		this.name.x = this.hp.x = this.stats.x = 10;
 
-		let levelBox = Utils.Graphics.circle(12, 0x111111);
+		let levelBox = graphics.circle(12, 0x111111);
 		let levelText = new PIXI.Text(creature.stats.level.toString(), { fill: 0xCCCCCC, fontSize: 12, fontWeight: 'bold' });
 
 		levelBox.position.set(140, -5);
@@ -356,19 +363,19 @@ class HeroMenu extends UIElement {
 
 		this.hero = hero;
 
-		let curtain = Utils.Graphics.rectangle(game.width, game.height, 0x000000);
+		let curtain = graphics.rectangle(game.width, game.height, 0x000000);
 		curtain.alpha = 0.5;
 
 		this.graphics.addChild(curtain);
 
-		this.container = Utils.Graphics.rectangle(600, 400, 0x111111);
+		this.container = graphics.rectangle(600, 400, 0x111111);
 		this.container.position.set((game.width - 600) / 2, (game.height - 400) / 2);
 
 		this.graphics.addChild(this.container);
 
 		let closeButton = new PIXI.Container();
 
-		let closeButtonBackground = Utils.Graphics.rectangle(80, 40, 0xCC0000);
+		let closeButtonBackground = graphics.rectangle(80, 40, 0xCC0000);
 		let closeButtonText = new PIXI.Text('Close', { fontSize: 12, fill: 0xFFFFFF });
 
 		closeButton.addChild(closeButtonBackground);
@@ -397,7 +404,7 @@ class HeroMenu extends UIElement {
 	stats() {
 		let statsContainer = new PIXI.Container();
 
-		let backgroundShading = Utils.Graphics.rectangle(200, 380, 0x222222);
+		let backgroundShading = graphics.rectangle(200, 380, 0x222222);
 		let titleText = new PIXI.Text(this.hero.name + ' Level ' + this.hero.stats.level, { fill: 0xFFFFFF, fontSize: 14 });
 
 		titleText.position.set(20, 20);
@@ -429,7 +436,7 @@ class HeroMenu extends UIElement {
 	 */
 	skills() {
 		let skillsContainer = new PIXI.Container();
-		let backgroundShading = Utils.Graphics.rectangle(370, 380, 0x222222);
+		let backgroundShading = graphics.rectangle(370, 380, 0x222222);
 
 		skillsContainer.addChild(backgroundShading);
 		skillsContainer.position.set(220, 10);
@@ -442,8 +449,8 @@ class Bar {
 	constructor(width, height, background = 0x000000, foreground = 0xFFFFFF) {
 		this.graphics = new PIXI.Container();
 
-		this.background = Utils.Graphics.rectangle(width, height, background);
-		this.foreground = Utils.Graphics.rectangle(width, height, foreground);
+		this.background = graphics.rectangle(width, height, background);
+		this.foreground = graphics.rectangle(width, height, foreground);
 
 		this.graphics.addChild(this.background);
 		this.graphics.addChild(this.foreground);
@@ -452,7 +459,7 @@ class Bar {
 	}
 
 	set percentage(value) {
-		this._percentage = Utils.Math.clamp(value, 0, 1);
+		this._percentage = math.clamp(value, 0, 1);
 		this.foreground.scale.x = this._percentage;
 	}
 
@@ -470,12 +477,12 @@ class VictoryScreen extends EventEmitter {
 		this.graphics.interactive = true;
 		this.graphics.interactiveChildren = true;
 
-		this.curtain = Utils.Graphics.rectangle(game.width, game.height, 0x000000);
+		this.curtain = graphics.rectangle(game.width, game.height, 0x000000);
 		this.curtain.alpha = 0.6;
 
 		this.modal = new PIXI.Container();
 		
-		this.modalBackground = Utils.Graphics.rectangle(300, 400, 0x111111);
+		this.modalBackground = graphics.rectangle(300, 400, 0x111111);
 		this.modal.addChild(this.modalBackground);
 
 		this.modal.position.set((game.width - 300) / 2, (game.height - 400) / 2);
@@ -486,7 +493,7 @@ class VictoryScreen extends EventEmitter {
 		this.okButton = new PIXI.Container();
 		this.okButton.interactive = this.okButton.buttonMode = true;
 		this.okButton.position.set(20, 340);
-		this.okButton.addChild(Utils.Graphics.rectangle(260, 40, 0xAAAAAA));
+		this.okButton.addChild(graphics.rectangle(260, 40, 0xAAAAAA));
 		
 		let okText = new PIXI.Text('Continue', { fill: 0x000000, fontSize: 14 });
 		okText.position.set(10, 10);
@@ -514,14 +521,14 @@ class VictoryScreen extends EventEmitter {
 				let levelsAdvanced = hero.addExp(result.exp);
 
 				if (levelsAdvanced > 0) {
-					Utils.Animation.tween(bar).to({ percentage: 1 }, 1000, Utils.Animation.ease('sineInOut')).wait(200).call(() => {
+					animation.tween(bar).to({ percentage: 1 }, 1000, animation.ease('sineInOut')).wait(200).call(() => {
 						text.text = hero.name + ' - Level ' + hero.stats.level;
 						bar.percentage = 0;
 
-						Utils.Animation.tween(bar).to({ percentage: hero.levelling.exp / hero.levelling.nextLevel }, 1000, Utils.Animation.ease('sineInOut'));
+						animation.tween(bar).to({ percentage: hero.levelling.exp / hero.levelling.nextLevel }, 1000, animation.ease('sineInOut'));
 					});
 				} else {
-					Utils.Animation.tween(bar).to({ percentage: hero.levelling.exp / hero.levelling.nextLevel }, 1000, Utils.Animation.ease('sineInOut'));
+					animation.tween(bar).to({ percentage: hero.levelling.exp / hero.levelling.nextLevel }, 1000, animation.ease('sineInOut'));
 				}
 			}
 		});
@@ -559,7 +566,7 @@ class Tip {
 			y += text.height + lineSpacing;
 		});
 
-		let background = Utils.Graphics.rectangle(widest + (padding * 2), y + (padding * 2) - lineSpacing, 0x222222);
+		let background = graphics.rectangle(widest + (padding * 2), y + (padding * 2) - lineSpacing, 0x222222);
 		this.graphics.addChildAt(background, 0);
 	}
 }

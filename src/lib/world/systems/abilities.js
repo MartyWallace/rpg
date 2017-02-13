@@ -1,7 +1,17 @@
-const Abilities = {
-	FLOW_CREATURE_TARGETED: 'creatureTargeted',
-	FLOW_CELL_TARGETED: 'cellTargeted',
-	FLOW_UNTARGETED: 'untargeted',
+import game from '../../game';
+import random from '../../utils/random';
+import animation from '../../utils/animation';
+import battleUtils from '../../utils/battle';
+import Damage from './damage';
+
+const FLOW_CREATURE_TARGETED = 'creatureTargeted';
+const FLOW_CELL_TARGETED = 'cellTargeted';
+const FLOW_UNTARGETED = 'untargeted';
+
+export default {
+	FLOW_CREATURE_TARGETED,
+	FLOW_CELL_TARGETED,
+	FLOW_UNTARGETED,
 
 	Types: {
 		_visited: { },
@@ -12,7 +22,7 @@ const Abilities = {
 		attack() {
 			return {
 				name: 'Attack',
-				flow: Abilities.FLOW_CREATURE_TARGETED,
+				flow: FLOW_CREATURE_TARGETED,
 				allowDeadTargets: false,
 				icon: '/textures/ability-icons/attack.png',
 
@@ -23,10 +33,10 @@ const Abilities = {
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
-						Utils.Animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
-							if (Utils.Random.roll(BattleUtils.getHitChance(creature, target))) {
+						animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+							if (random.roll(battleUtils.getHitChance(creature, target))) {
 								let range = this.getDamageRange(creature);
-								target.takeDamage(new Damage(Utils.Random.between(range.min, range.max)));
+								target.takeDamage(new Damage(random.between(range.min, range.max)));
 							} else {
 								game.ui.worldText(target.cell, 'Miss!');
 							}
@@ -52,7 +62,7 @@ const Abilities = {
 		skip() {
 			return {
 				name: 'Skip',
-				flow: Abilities.FLOW_UNTARGETED,
+				flow: FLOW_UNTARGETED,
 				icon: '/textures/ability-icons/skip.png',
 
 				behaviour(creature, battle) {
@@ -74,7 +84,7 @@ const Abilities = {
 		bandage() {
 			return {
 				name: 'Bandage',
-				flow: Abilities.FLOW_CREATURE_TARGETED,
+				flow: FLOW_CREATURE_TARGETED,
 				allowDeadTargets: false,
 				icon: '/textures/ability-icons/bandage.png',
 
@@ -84,9 +94,9 @@ const Abilities = {
 
 				behaviour(creature, battle, target) {
 					return new Promise((resolve, reject) => {
-						Utils.Animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
+						animation.tween(creature.graphics).to({ x: target.graphics.x, y: target.graphics.y }, 200).call(() => {
 							let range = this.getHealRange(creature);
-							target.takeDamage(new Damage(Utils.Random.between(range.max, range.min)));
+							target.takeDamage(new Damage(random.between(range.max, range.min)));
 						}).to({ x: creature.cell.x * game.world.scale, y: creature.cell.y * game.world.scale }, 200).call(() => resolve());
 					});
 				},

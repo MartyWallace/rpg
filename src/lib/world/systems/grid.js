@@ -1,4 +1,7 @@
-class Grid {
+import graphics from '../../utils/graphics';
+import random from '../../utils/random';
+
+export default class Grid {
 	constructor(world, width, height) {
 		this.world = world;
 		this.width = width;
@@ -21,7 +24,7 @@ class Grid {
 
 		for (let x = 0; x < this.width; x++ ) {
 			for (let y = 0; y < this.height; y++) {
-				//let box = Utils.Graphics.rectangle(scale, scale, light ? 0x666666 : 0x606060);
+				//let box = graphics.rectangle(scale, scale, light ? 0x666666 : 0x606060);
 				let box = PIXI.Sprite.fromImage('/textures/' + (light ? 'ground-light' : 'ground') + '.png');
 				box.position.set(x * scale, y * scale);
 
@@ -89,7 +92,7 @@ class Grid {
 	}
 }
 
-class Cell {
+export class Cell {
 	constructor(grid, x, y) {
 		this.grid = grid;
 		this.x = x;
@@ -117,7 +120,7 @@ class Cell {
 	}
 
 	highlight(color, scale) {
-		this.highlightGraphics = Utils.Graphics.rectangle(scale, scale, color);
+		this.highlightGraphics = graphics.rectangle(scale, scale, color);
 		this.highlightGraphics.alpha = 0.5;
 		this.highlightGraphics.position.set(this.x * scale, this.y * scale);
 
@@ -161,7 +164,7 @@ class Cell {
 	}
 }
 
-class CellGroup {
+export class CellGroup {
 	constructor(cells) {
 		this.cells = cells;
 	}
@@ -173,13 +176,13 @@ class CellGroup {
 	}
 
 	randomCell() {
-		return Utils.Random.fromArray(this.cells);
+		return random.fromArray(this.cells);
 	}
 
 	get length() { return this.cells.length; }
 }
 
-class Path extends CellGroup {
+export class Path extends CellGroup {
 	constructor(cells) {
 		super(cells);
 	}
@@ -219,7 +222,7 @@ class Path extends CellGroup {
 	}
 }
 
-class Cluster extends CellGroup {
+export class Cluster extends CellGroup {
 	constructor(cells) {
 		super(cells);
 	}

@@ -1,41 +1,23 @@
-class Party extends EventEmitter {
-	constructor(heroes) {
-		super();
+import game from '../game';
+import config from '../../config';
+import List from '../utils/list';
+import Map from './systems/map';
+import Grid from './systems/grid';
+import Party from './systems/party';
+import Battle from './systems/battle';
+import { InteractiveBeing, Creature } from './beings';
+import animation from '../utils/animation';
+import random from '../utils/random';
+import math from '../utils/math';
 
-		this.heroes = heroes;
-	}
+import Door from './beings/door';
+import Hero from './beings/hero';
+import Skeleton from './beings/skeleton';
+import Wall from './beings/wall';
 
-	moveToCell(cell, duration = 0) {
-		return new Promise((resolve, reject) => {
-			let last = cell;
-			let moves = [];
+const beings = { Door, Hero, Skeleton, Wall };
 
-			this.heroes.forEach(hero => {
-				moves.push(hero.moveToCell(last, duration, 'linear'));
-				last = hero.prevCell;
-			});
-			
-			Promise.all(moves).then(cells => {
-				game.world.alertInteractiveBeings(cell);
-				resolve(cell);
-			});
-		});
-	}
-
-	save() {
-		return this.heroes.map(hero => hero.save());
-	}
-
-	randomHero() {
-		return Utils.Random.fromArray(this.heroes);
-	}
-
-	get leader() {
-		return this.heroes.length > 0 ? this.heroes[0] : null;
-	}
-}
-
-class World extends EventEmitter {
+export default class World extends EventEmitter {
 	constructor(scale = 40) {
 		super();
 
@@ -99,8 +81,8 @@ class World extends EventEmitter {
 		let x = event.data.global.x - this.graphics.x;
 		let y = event.data.global.y - this.graphics.y;
 
-		if (this.grid && this.grid.isWithin(x, y, DRAW_SCALE)) {
-			return this.grid.find(x, y, DRAW_SCALE);
+		if (this.grid && this.grid.isWithin(x, y, config.DRAW_SCALE)) {
+			return this.grid.find(x, y, config.DRAW_SCALE);
 		}
 
 		return null;
@@ -200,10 +182,10 @@ class World extends EventEmitter {
 			this.setState(this.STATE_BATTLE);
 
 			let enemies = [];
-			let amount = Math.round(Utils.Random.between(2, 4));
+			let amount = Math.round(random.between(2, 4));
 
 			while (enemies.length < amount) {
-				let def = Utils.Random.fromArray(this.map.enemies);
+				let def = random.fromArray(this.map.enemies);
 				let cell = this.grid.cluster(this.party.leader.cell, 4).filter(cell => cell.empty).randomCell();
 				let enemy = this.create({ type: def.type, x: cell.x, y: cell.y });
 
@@ -362,11 +344,11 @@ class World extends EventEmitter {
 				let targetY = -cell.y * this.scale + (game.height / 2) - (this.scale / 2);
 
 				if (clamp) {
-					targetX = Utils.Math.clamp(targetX, game.width - this.width, 0);
-					targetY = Utils.Math.clamp(targetY, game.height - this.height, 0);
+					targetX = math.clamp(targetX, game.width - this.width, 0);
+					targetY = math.clamp(targetY, game.height - this.height, 0);
 				}
 
-				Utils.Animation.tween(this.graphics).to({ x: targetX, y: targetY }, duration, Utils.Animation.ease(ease)).call(() => {
+				animation.tween(this.graphics).to({ x: targetX, y: targetY }, duration, animation.ease(ease)).call(() => {
 					this.viewing = cell;
 					resolve(cell);
 				});
@@ -385,22 +367,4 @@ class World extends EventEmitter {
 
 	get width() { return this.grid.width * this.scale; }
 	get height() { return this.grid.height * this.scale; }
-}
-
-class Map {
-	constructor(data) {
-		this.data = data;
-	}
-
-	hasDoorAt(x, y) {
-		for (let door of this.data.doors) {
-			if (door.x === x && door.y === y) return true;
-		}
-
-		return false;
-	}
-
-	get enemies() {
-		return this.data.enemies;
-	}
 }
