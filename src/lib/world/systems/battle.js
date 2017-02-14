@@ -19,6 +19,7 @@ export default class Battle extends EventEmitter {
 
 		this.enemies.forEach(enemy => {
 			enemy.on('die', () => {
+				this.result.exp += enemy.generateExpReward();
 				this.removeEnemy(enemy);
 
 				if (this.enemies.length > 0) {
@@ -133,6 +134,6 @@ export default class Battle extends EventEmitter {
 
 export class BattleResult {
 	constructor() {
-		this.exp = 10;
+		this.exp = 0;
 	}
 }

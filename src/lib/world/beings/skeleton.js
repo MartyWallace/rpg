@@ -11,16 +11,17 @@ export default class Skeleton extends Enemy {
 		this.name = 'Skeleton';
 		
 		this.stats.merge({
-			vitality: 12,
-			strength: random.between(15, 20),
+			vitality: 3,
+			strength: random.between(9, 12),
 			evasion: 10,
-			accuracy: 16,
-			level: 4
+			accuracy: 14,
+			level: 1
 		});
 
 		this.stats.refill();
 
 		this.graphics = new PIXI.Sprite.fromImage('/textures/skeleton.png');
+		this.graphics.pivot.set(this.graphics.width / 2, this.graphics.height / 2);
 
 		this.setCell(cell);
 	}
@@ -38,5 +39,9 @@ export default class Skeleton extends Enemy {
 				// ...
 			}
 		});
+	}
+
+	generateExpReward() {
+		return 1 + Math.round(random.between(3, 5));
 	}
 }

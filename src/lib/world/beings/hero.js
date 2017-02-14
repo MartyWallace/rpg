@@ -67,8 +67,7 @@ export default class Hero extends Creature {
 	}
 
 	update() {
-		// TODO: Face mouse.
-		// ...
+		if (game.world.lastHoverCell) this.face(game.world.lastHoverCell);
 	}
 
 	action(battle) {

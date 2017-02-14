@@ -9,7 +9,7 @@ export default class Wall extends Being {
 		this.walkable = false;
 		this.layer = 'structures';
 
-		this.graphics = graphics.rectangle(game.world.scale, game.world.scale, 0x000000);
+		this.graphics = PIXI.Sprite.fromImage('/textures/wall.png');
 		
 		this.setCell(cell);
 	}

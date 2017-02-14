@@ -103,6 +103,12 @@ export class Creature extends Being {
 		}
 	}
 
+	face(cell) {
+		if (this.graphics) {
+			this.graphics.rotation = Math.atan2(cell.y - this.cell.y, cell.x - this.cell.x);
+		}
+	}
+
 	action(battle) {
 		return new Promise(resolve => resolve());
 	}
@@ -132,6 +138,14 @@ export class Creature extends Being {
 export class Enemy extends Creature {
 	constructor(cell, def) {
 		super(cell, def);
+	}
+
+	update() {
+		this.face(game.world.party.leader.cell);
+	}
+
+	generateExpReward() {
+		return 1;
 	}
 }
 
